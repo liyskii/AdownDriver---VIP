@@ -1,0 +1,86 @@
+solid VL53L1X_ToF_Bumper_Bracket
+  facet normal 0.0 0.0 1.0
+    outer loop
+      vertex -15.00 -10.00 0.00
+      vertex 15.00 -10.00 0.00
+      vertex 15.00 10.00 0.00
+    endloop
+  endfacet
+  facet normal 0.0 0.0 1.0
+    outer loop
+      vertex -15.00 -10.00 0.00
+      vertex 15.00 10.00 0.00
+      vertex -15.00 10.00 0.00
+    endloop
+  endfacet
+  facet normal 0.0 0.0 1.0
+    outer loop
+      vertex -15.00 -10.00 25.00
+      vertex 15.00 10.00 25.00
+      vertex 15.00 -10.00 25.00
+    endloop
+  endfacet
+  facet normal 0.0 0.0 1.0
+    outer loop
+      vertex -15.00 -10.00 25.00
+      vertex -15.00 10.00 25.00
+      vertex 15.00 10.00 25.00
+    endloop
+  endfacet
+  facet normal 0.0 0.0 1.0
+    outer loop
+      vertex -15.00 -10.00 0.00
+      vertex -15.00 -10.00 25.00
+      vertex 15.00 -10.00 25.00
+    endloop
+  endfacet
+  facet normal 0.0 0.0 1.0
+    outer loop
+      vertex -15.00 -10.00 0.00
+      vertex 15.00 -10.00 25.00
+      vertex 15.00 -10.00 0.00
+    endloop
+  endfacet
+  facet normal 0.0 0.0 1.0
+    outer loop
+      vertex 15.00 -10.00 0.00
+      vertex 15.00 -10.00 25.00
+      vertex 15.00 10.00 25.00
+    endloop
+  endfacet
+  facet normal 0.0 0.0 1.0
+    outer loop
+      vertex 15.00 -10.00 0.00
+      vertex 15.00 10.00 25.00
+      vertex 15.00 10.00 0.00
+    endloop
+  endfacet
+  facet normal 0.0 0.0 1.0
+    outer loop
+      vertex 15.00 10.00 0.00
+      vertex 15.00 10.00 25.00
+      vertex -15.00 10.00 25.00
+    endloop
+  endfacet
+  facet normal 0.0 0.0 1.0
+    outer loop
+      vertex 15.00 10.00 0.00
+      vertex -15.00 10.00 25.00
+      vertex -15.00 10.00 0.00
+    endloop
+  endfacet
+  facet normal 0.0 0.0 1.0
+    outer loop
+      vertex -15.00 10.00 0.00
+      vertex -15.00 10.00 25.00
+      vertex -15.00 -10.00 25.00
+    endloop
+  endfacet
+  facet normal 0.0 0.0 1.0
+    outer loop
+      vertex -15.00 10.00 0.00
+      vertex -15.00 -10.00 25.00
+      vertex -15.00 -10.00 0.00
+    endloop
+  endfacet
+endsolid VL53L1X_ToF_Bumper_Bracket

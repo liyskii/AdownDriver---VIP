@@ -1,0 +1,86 @@
+solid PiCameraV2_Mount_25deg
+  facet normal 0.0 0.0 1.0
+    outer loop
+      vertex -18.00 -14.00 0.00
+      vertex 18.00 -14.00 0.00
+      vertex 18.00 14.00 0.00
+    endloop
+  endfacet
+  facet normal 0.0 0.0 1.0
+    outer loop
+      vertex -18.00 -14.00 0.00
+      vertex 18.00 14.00 0.00
+      vertex -18.00 14.00 0.00
+    endloop
+  endfacet
+  facet normal 0.0 0.0 1.0
+    outer loop
+      vertex -18.00 -14.00 42.00
+      vertex 18.00 14.00 42.00
+      vertex 18.00 -14.00 42.00
+    endloop
+  endfacet
+  facet normal 0.0 0.0 1.0
+    outer loop
+      vertex -18.00 -14.00 42.00
+      vertex -18.00 14.00 42.00
+      vertex 18.00 14.00 42.00
+    endloop
+  endfacet
+  facet normal 0.0 0.0 1.0
+    outer loop
+      vertex -18.00 -14.00 0.00
+      vertex -18.00 -14.00 42.00
+      vertex 18.00 -14.00 42.00
+    endloop
+  endfacet
+  facet normal 0.0 0.0 1.0
+    outer loop
+      vertex -18.00 -14.00 0.00
+      vertex 18.00 -14.00 42.00
+      vertex 18.00 -14.00 0.00
+    endloop
+  endfacet
+  facet normal 0.0 0.0 1.0
+    outer loop
+      vertex 18.00 -14.00 0.00
+      vertex 18.00 -14.00 42.00
+      vertex 18.00 14.00 42.00
+    endloop
+  endfacet
+  facet normal 0.0 0.0 1.0
+    outer loop
+      vertex 18.00 -14.00 0.00
+      vertex 18.00 14.00 42.00
+      vertex 18.00 14.00 0.00
+    endloop
+  endfacet
+  facet normal 0.0 0.0 1.0
+    outer loop
+      vertex 18.00 14.00 0.00
+      vertex 18.00 14.00 42.00
+      vertex -18.00 14.00 42.00
+    endloop
+  endfacet
+  facet normal 0.0 0.0 1.0
+    outer loop
+      vertex 18.00 14.00 0.00
+      vertex -18.00 14.00 42.00
+      vertex -18.00 14.00 0.00
+    endloop
+  endfacet
+  facet normal 0.0 0.0 1.0
+    outer loop
+      vertex -18.00 14.00 0.00
+      vertex -18.00 14.00 42.00
+      vertex -18.00 -14.00 42.00
+    endloop
+  endfacet
+  facet normal 0.0 0.0 1.0
+    outer loop
+      vertex -18.00 14.00 0.00
+      vertex -18.00 -14.00 42.00
+      vertex -18.00 -14.00 0.00
+    endloop
+  endfacet
+endsolid PiCameraV2_Mount_25deg
