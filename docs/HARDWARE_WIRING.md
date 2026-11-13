@@ -21,7 +21,7 @@ Only parts from the team inventory are used. Pin numbers are **BCM GPIO** number
 | Travel Wi-Fi router | 1 | Dedicated local network (docs/NETWORK.md) |
 | Matte black EVA mats + white/yellow non-reflective tape | — | Test track |
 | LED desk lamp (dimmable) | 1 | Lighting scenarios S12/S13 |
-| PLA 1.75 mm, M2.5/M3 screws & standoffs | — | 3D-printed mounts (cad_models/) |
+| PLA 1.75 mm, M2 / M2.5 / M3 screws & standoffs | — | 3D-printed mounts and enclosures (cad_models/): Node 2 status pod (buttons, LED, buzzer), Node 1 cockpit panel (OLED, buttons, LED, buzzer) |
 
 > The HC-SR04 ultrasonic sensor mentioned in revision 1 of the spec is **not** in the inventory and is not needed — the VL53L1X covers 4–130 cm in short mode at 30 Hz.
 
@@ -64,7 +64,7 @@ Only parts from the team inventory are used. Pin numbers are **BCM GPIO** number
  USB ──────────── OpenCR 1.0  (motors)   USB ── LDS (unused by AdownDriver)
 ```
 
-* The VL53L1X sits on the printed bracket at the front bumper, optical centre **45 mm** above the mat, pitch 0°, so the floor is never in the 27° field of view at < 1.3 m.
+* The VL53L1X sits on the printed bracket at the front of the robot, optical centre ≈ 44 mm above the mount face, **tilted 10° up**: with the 27° field of view the floor enters the cone only at ≈ 0.7 m instead of ≈ 0.19 m (level mount), so it cannot trigger the 20 cm EMERGENCY_STOP. Details: `cad_models/CAD_SPECIFICATIONS.md`.
 * The Pi Camera V2 sits on the printed **25° down-tilt** mount on the top plate, lens ≈ 19.5 cm above the mat (measure and set `camera.height_m`).
 * The TurtleBot Pi is powered from the OpenCR 5 V rail (battery). Use the aluminium heatsinks — the Pi 4 throttles at 80 °C, which would break the 100 ms latency budget. The dashboard shows the CPU temperature.
 

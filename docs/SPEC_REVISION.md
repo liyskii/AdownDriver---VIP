@@ -40,6 +40,7 @@ Paste the relevant parts into the final report (section "Design iteration").
 * "468 landmarks" → FaceLandmarker returns 478 (468 + 10 iris).
 * The Logitech C270 has **no tripod thread**; the printed stand now has a clip ledge.
 * The placeholder STL files were 12-triangle boxes; replaced by parametric parts (`cad_models/generate_stl.py`).
+* CAD rev 3: camera mount plate was generated at the base (lost `translate`) → fixed; a level VL53L1X sees the floor at ≈ 0.19 m (27° cone) → bracket tilted 10° up; webcam stand pocket was a 60 mm unsupported bridge → opened at the top; added the Node 2 status pod and Node 1 cockpit panel enclosures; all parts checked against the M-124 printer (220 × 220 × 250 mm, no supports).
 * Active buzzer must be driven through the 2N2222/S8050 (GPIO max 16 mA) — wiring in `docs/HARDWARE_WIRING.md`.
 * Buzzer/LED on **both** nodes: the cockpit buzzer wakes the driver; the robot LED shows the state to observers.
 
