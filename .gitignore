@@ -1,20 +1,17 @@
-# Python
 __pycache__/
 *.py[cod]
-*$py.class
-venv/
-env/
 .venv/
-
-# IDE
+venv/
+.pytest_cache/
 .vscode/
 .idea/
-
-# OS
 .DS_Store
 Thumbs.db
-
-# Project logs and local data
-logs/*.csv
+# run-time data
+logs/*.db
+logs/*.db-*
+logs/runs/
+logs/validation/*.png
+models/*.task
+config/local.yaml
 data/*.mp4
-*.local

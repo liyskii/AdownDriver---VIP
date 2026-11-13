@@ -1,0 +1,840 @@
+{
+  "generated": "2026-11-13 19:55:59",
+  "scenarios": [
+    {
+      "id": "S01",
+      "name": "Baseline cruise, natural blinking",
+      "passed": true,
+      "states": [
+        "STANDBY",
+        "NORMAL_CRUISE"
+      ],
+      "final": "NORMAL_CRUISE",
+      "checks": [
+        {
+          "check": "never WARNING",
+          "ok": true
+        },
+        {
+          "check": "never SPEED_REDUCTION",
+          "ok": true
+        },
+        {
+          "check": "never CONTROLLED_STOP",
+          "ok": true
+        },
+        {
+          "check": "never EMERGENCY_STOP",
+          "ok": true
+        },
+        {
+          "check": "ends in NORMAL_CRUISE",
+          "ok": true
+        },
+        {
+          "check": "stays within lane (|e| < 10 cm)",
+          "ok": true
+        },
+        {
+          "check": "blink_false_alarms == 0 (got 0)",
+          "ok": true
+        }
+      ],
+      "lane_dev_true_cm": null,
+      "min_clearance_cm": null,
+      "max_abs_e_cm": 3.27,
+      "metrics": {
+        "f1": null,
+        "blink_false_alarms": 0,
+        "lag_p95_ms": 5.35,
+        "lane_dev_stop_cm": null,
+        "brake_latency_ms": null
+      }
+    },
+    {
+      "id": "S02",
+      "name": "Rapid blinking (300 ms every ~2 s)",
+      "passed": true,
+      "states": [
+        "STANDBY",
+        "NORMAL_CRUISE"
+      ],
+      "final": "NORMAL_CRUISE",
+      "checks": [
+        {
+          "check": "never SPEED_REDUCTION",
+          "ok": true
+        },
+        {
+          "check": "never CONTROLLED_STOP",
+          "ok": true
+        },
+        {
+          "check": "never EMERGENCY_STOP",
+          "ok": true
+        },
+        {
+          "check": "ends in NORMAL_CRUISE",
+          "ok": true
+        },
+        {
+          "check": "stays within lane (|e| < 10 cm)",
+          "ok": true
+        },
+        {
+          "check": "blink_false_alarms == 0 (got 0)",
+          "ok": true
+        }
+      ],
+      "lane_dev_true_cm": null,
+      "min_clearance_cm": null,
+      "max_abs_e_cm": 3.27,
+      "metrics": {
+        "f1": null,
+        "blink_false_alarms": 0,
+        "lag_p95_ms": 5.27,
+        "lane_dev_stop_cm": null,
+        "brake_latency_ms": null
+      }
+    },
+    {
+      "id": "S03",
+      "name": "Talking / reading aloud",
+      "passed": true,
+      "states": [
+        "STANDBY",
+        "NORMAL_CRUISE"
+      ],
+      "final": "NORMAL_CRUISE",
+      "checks": [
+        {
+          "check": "never WARNING",
+          "ok": true
+        },
+        {
+          "check": "never SPEED_REDUCTION",
+          "ok": true
+        },
+        {
+          "check": "never CONTROLLED_STOP",
+          "ok": true
+        },
+        {
+          "check": "never EMERGENCY_STOP",
+          "ok": true
+        },
+        {
+          "check": "ends in NORMAL_CRUISE",
+          "ok": true
+        },
+        {
+          "check": "stays within lane (|e| < 10 cm)",
+          "ok": true
+        },
+        {
+          "check": "blink_false_alarms == 0 (got 0)",
+          "ok": true
+        }
+      ],
+      "lane_dev_true_cm": null,
+      "min_clearance_cm": null,
+      "max_abs_e_cm": 3.27,
+      "metrics": {
+        "f1": null,
+        "blink_false_alarms": 0,
+        "lag_p95_ms": 4.57,
+        "lane_dev_stop_cm": null,
+        "brake_latency_ms": null
+      }
+    },
+    {
+      "id": "S04",
+      "name": "Single yawn",
+      "passed": true,
+      "states": [
+        "STANDBY",
+        "NORMAL_CRUISE",
+        "WARNING",
+        "NORMAL_CRUISE"
+      ],
+      "final": "NORMAL_CRUISE",
+      "checks": [
+        {
+          "check": "reaches WARNING",
+          "ok": true
+        },
+        {
+          "check": "never SPEED_REDUCTION",
+          "ok": true
+        },
+        {
+          "check": "never CONTROLLED_STOP",
+          "ok": true
+        },
+        {
+          "check": "ends in NORMAL_CRUISE",
+          "ok": true
+        },
+        {
+          "check": "reason YAWN",
+          "ok": true
+        },
+        {
+          "check": "stays within lane (|e| < 10 cm)",
+          "ok": true
+        },
+        {
+          "check": "blink_false_alarms == 0 (got 0)",
+          "ok": true
+        }
+      ],
+      "lane_dev_true_cm": null,
+      "min_clearance_cm": null,
+      "max_abs_e_cm": 3.27,
+      "metrics": {
+        "f1": 1.0,
+        "blink_false_alarms": 0,
+        "lag_p95_ms": 4.39,
+        "lane_dev_stop_cm": null,
+        "brake_latency_ms": null
+      }
+    },
+    {
+      "id": "S05",
+      "name": "Repeated yawning (3 in 30 s)",
+      "passed": true,
+      "states": [
+        "STANDBY",
+        "NORMAL_CRUISE",
+        "WARNING",
+        "NORMAL_CRUISE",
+        "WARNING",
+        "NORMAL_CRUISE",
+        "SPEED_REDUCTION",
+        "NORMAL_CRUISE"
+      ],
+      "final": "NORMAL_CRUISE",
+      "checks": [
+        {
+          "check": "reaches WARNING",
+          "ok": true
+        },
+        {
+          "check": "reaches SPEED_REDUCTION",
+          "ok": true
+        },
+        {
+          "check": "never CONTROLLED_STOP",
+          "ok": true
+        },
+        {
+          "check": "ends in NORMAL_CRUISE",
+          "ok": true
+        },
+        {
+          "check": "reason REPEATED_YAWNING",
+          "ok": true
+        },
+        {
+          "check": "stays within lane (|e| < 10 cm)",
+          "ok": true
+        },
+        {
+          "check": "blink_false_alarms == 0 (got 0)",
+          "ok": true
+        }
+      ],
+      "lane_dev_true_cm": null,
+      "min_clearance_cm": null,
+      "max_abs_e_cm": 3.27,
+      "metrics": {
+        "f1": 1.0,
+        "blink_false_alarms": 0,
+        "lag_p95_ms": 5.78,
+        "lane_dev_stop_cm": null,
+        "brake_latency_ms": null
+      }
+    },
+    {
+      "id": "S06",
+      "name": "Microsleep 1.8 s",
+      "passed": true,
+      "states": [
+        "STANDBY",
+        "NORMAL_CRUISE",
+        "WARNING",
+        "NORMAL_CRUISE"
+      ],
+      "final": "NORMAL_CRUISE",
+      "checks": [
+        {
+          "check": "reaches WARNING",
+          "ok": true
+        },
+        {
+          "check": "never SPEED_REDUCTION",
+          "ok": true
+        },
+        {
+          "check": "never CONTROLLED_STOP",
+          "ok": true
+        },
+        {
+          "check": "ends in NORMAL_CRUISE",
+          "ok": true
+        },
+        {
+          "check": "reason EYE_CLOSURE",
+          "ok": true
+        },
+        {
+          "check": "stays within lane (|e| < 10 cm)",
+          "ok": true
+        },
+        {
+          "check": "blink_false_alarms == 0 (got 0)",
+          "ok": true
+        }
+      ],
+      "lane_dev_true_cm": null,
+      "min_clearance_cm": null,
+      "max_abs_e_cm": 3.27,
+      "metrics": {
+        "f1": 1.0,
+        "blink_false_alarms": 0,
+        "lag_p95_ms": 5.34,
+        "lane_dev_stop_cm": null,
+        "brake_latency_ms": null
+      }
+    },
+    {
+      "id": "S07",
+      "name": "Microsleep 3.2 s",
+      "passed": true,
+      "states": [
+        "STANDBY",
+        "NORMAL_CRUISE",
+        "WARNING",
+        "SPEED_REDUCTION",
+        "NORMAL_CRUISE"
+      ],
+      "final": "NORMAL_CRUISE",
+      "checks": [
+        {
+          "check": "reaches WARNING",
+          "ok": true
+        },
+        {
+          "check": "reaches SPEED_REDUCTION",
+          "ok": true
+        },
+        {
+          "check": "never CONTROLLED_STOP",
+          "ok": true
+        },
+        {
+          "check": "ends in NORMAL_CRUISE",
+          "ok": true
+        },
+        {
+          "check": "reason SUSTAINED_EYE_CLOSURE",
+          "ok": true
+        },
+        {
+          "check": "stays within lane (|e| < 10 cm)",
+          "ok": true
+        },
+        {
+          "check": "blink_false_alarms == 0 (got 0)",
+          "ok": true
+        }
+      ],
+      "lane_dev_true_cm": null,
+      "min_clearance_cm": null,
+      "max_abs_e_cm": 3.16,
+      "metrics": {
+        "f1": 1.0,
+        "blink_false_alarms": 0,
+        "lag_p95_ms": 4.22,
+        "lane_dev_stop_cm": null,
+        "brake_latency_ms": null
+      }
+    },
+    {
+      "id": "S08",
+      "name": "Sustained closure -> graduated safe stop, then reset",
+      "passed": true,
+      "states": [
+        "STANDBY",
+        "NORMAL_CRUISE",
+        "WARNING",
+        "SPEED_REDUCTION",
+        "CONTROLLED_STOP",
+        "STANDBY",
+        "NORMAL_CRUISE"
+      ],
+      "final": "NORMAL_CRUISE",
+      "checks": [
+        {
+          "check": "reaches WARNING",
+          "ok": true
+        },
+        {
+          "check": "reaches SPEED_REDUCTION",
+          "ok": true
+        },
+        {
+          "check": "reaches CONTROLLED_STOP",
+          "ok": true
+        },
+        {
+          "check": "reaches STANDBY",
+          "ok": true
+        },
+        {
+          "check": "never EMERGENCY_STOP",
+          "ok": true
+        },
+        {
+          "check": "ends in NORMAL_CRUISE",
+          "ok": true
+        },
+        {
+          "check": "reason PERSISTENT_DROWSINESS",
+          "ok": true
+        },
+        {
+          "check": "stays within lane (|e| < 10 cm)",
+          "ok": true
+        },
+        {
+          "check": "lane_dev_stop_cm <= 5.0 (got 1.15)",
+          "ok": true
+        },
+        {
+          "check": "blink_false_alarms == 0 (got 0)",
+          "ok": true
+        }
+      ],
+      "lane_dev_true_cm": 1.15,
+      "min_clearance_cm": null,
+      "max_abs_e_cm": 3.03,
+      "metrics": {
+        "f1": 1.0,
+        "blink_false_alarms": 0,
+        "lag_p95_ms": 4.95,
+        "lane_dev_stop_cm": 1.15,
+        "brake_latency_ms": null
+      }
+    },
+    {
+      "id": "S09",
+      "name": "Looking away 3 s (distraction)",
+      "passed": true,
+      "states": [
+        "STANDBY",
+        "NORMAL_CRUISE",
+        "WARNING",
+        "NORMAL_CRUISE"
+      ],
+      "final": "NORMAL_CRUISE",
+      "checks": [
+        {
+          "check": "reaches WARNING",
+          "ok": true
+        },
+        {
+          "check": "never SPEED_REDUCTION",
+          "ok": true
+        },
+        {
+          "check": "never CONTROLLED_STOP",
+          "ok": true
+        },
+        {
+          "check": "ends in NORMAL_CRUISE",
+          "ok": true
+        },
+        {
+          "check": "reason DRIVER_DISTRACTED",
+          "ok": true
+        },
+        {
+          "check": "stays within lane (|e| < 10 cm)",
+          "ok": true
+        },
+        {
+          "check": "blink_false_alarms == 0 (got 0)",
+          "ok": true
+        }
+      ],
+      "lane_dev_true_cm": null,
+      "min_clearance_cm": null,
+      "max_abs_e_cm": 3.27,
+      "metrics": {
+        "f1": null,
+        "blink_false_alarms": 0,
+        "lag_p95_ms": 5.0,
+        "lane_dev_stop_cm": null,
+        "brake_latency_ms": null
+      }
+    },
+    {
+      "id": "S10",
+      "name": "Driver camera occluded 2 s",
+      "passed": true,
+      "states": [
+        "STANDBY",
+        "NORMAL_CRUISE",
+        "SPEED_REDUCTION",
+        "NORMAL_CRUISE"
+      ],
+      "final": "NORMAL_CRUISE",
+      "checks": [
+        {
+          "check": "reaches SPEED_REDUCTION",
+          "ok": true
+        },
+        {
+          "check": "never CONTROLLED_STOP",
+          "ok": true
+        },
+        {
+          "check": "never EMERGENCY_STOP",
+          "ok": true
+        },
+        {
+          "check": "ends in NORMAL_CRUISE",
+          "ok": true
+        },
+        {
+          "check": "reason LOW_DRIVER_CONFIDENCE",
+          "ok": true
+        },
+        {
+          "check": "stays within lane (|e| < 10 cm)",
+          "ok": true
+        }
+      ],
+      "lane_dev_true_cm": null,
+      "min_clearance_cm": null,
+      "max_abs_e_cm": 3.65,
+      "metrics": {
+        "f1": null,
+        "blink_false_alarms": 0,
+        "lag_p95_ms": 5.2,
+        "lane_dev_stop_cm": null,
+        "brake_latency_ms": null
+      }
+    },
+    {
+      "id": "S11",
+      "name": "Driver leaves the seat 7 s",
+      "passed": true,
+      "states": [
+        "STANDBY",
+        "NORMAL_CRUISE",
+        "SPEED_REDUCTION",
+        "CONTROLLED_STOP"
+      ],
+      "final": "CONTROLLED_STOP",
+      "checks": [
+        {
+          "check": "reaches SPEED_REDUCTION",
+          "ok": true
+        },
+        {
+          "check": "reaches CONTROLLED_STOP",
+          "ok": true
+        },
+        {
+          "check": "never EMERGENCY_STOP",
+          "ok": true
+        },
+        {
+          "check": "ends in CONTROLLED_STOP",
+          "ok": true
+        },
+        {
+          "check": "reason DRIVER_NOT_MONITORABLE",
+          "ok": true
+        },
+        {
+          "check": "stays within lane (|e| < 10 cm)",
+          "ok": true
+        },
+        {
+          "check": "lane_dev_stop_cm <= 5.0 (got 0.88)",
+          "ok": true
+        }
+      ],
+      "lane_dev_true_cm": 0.88,
+      "min_clearance_cm": null,
+      "max_abs_e_cm": 0.88,
+      "metrics": {
+        "f1": null,
+        "blink_false_alarms": 0,
+        "lag_p95_ms": 4.67,
+        "lane_dev_stop_cm": 0.88,
+        "brake_latency_ms": null
+      }
+    },
+    {
+      "id": "S12",
+      "name": "Dim lighting (lamp at 20 %)",
+      "passed": true,
+      "states": [
+        "STANDBY",
+        "NORMAL_CRUISE"
+      ],
+      "final": "NORMAL_CRUISE",
+      "checks": [
+        {
+          "check": "never SPEED_REDUCTION",
+          "ok": true
+        },
+        {
+          "check": "never CONTROLLED_STOP",
+          "ok": true
+        },
+        {
+          "check": "never EMERGENCY_STOP",
+          "ok": true
+        },
+        {
+          "check": "ends in NORMAL_CRUISE",
+          "ok": true
+        },
+        {
+          "check": "stays within lane (|e| < 10 cm)",
+          "ok": true
+        },
+        {
+          "check": "blink_false_alarms == 0 (got 0)",
+          "ok": true
+        }
+      ],
+      "lane_dev_true_cm": null,
+      "min_clearance_cm": null,
+      "max_abs_e_cm": 3.44,
+      "metrics": {
+        "f1": null,
+        "blink_false_alarms": 0,
+        "lag_p95_ms": 5.02,
+        "lane_dev_stop_cm": null,
+        "brake_latency_ms": null
+      }
+    },
+    {
+      "id": "S13",
+      "name": "Glare (lamp reflection on mat + bright face)",
+      "passed": true,
+      "states": [
+        "STANDBY",
+        "NORMAL_CRUISE"
+      ],
+      "final": "NORMAL_CRUISE",
+      "checks": [
+        {
+          "check": "never CONTROLLED_STOP",
+          "ok": true
+        },
+        {
+          "check": "never EMERGENCY_STOP",
+          "ok": true
+        },
+        {
+          "check": "ends in NORMAL_CRUISE",
+          "ok": true
+        },
+        {
+          "check": "stays within lane (|e| < 10 cm)",
+          "ok": true
+        },
+        {
+          "check": "blink_false_alarms == 0 (got 0)",
+          "ok": true
+        }
+      ],
+      "lane_dev_true_cm": null,
+      "min_clearance_cm": null,
+      "max_abs_e_cm": 5.75,
+      "metrics": {
+        "f1": null,
+        "blink_false_alarms": 0,
+        "lag_p95_ms": 5.14,
+        "lane_dev_stop_cm": null,
+        "brake_latency_ms": null
+      }
+    },
+    {
+      "id": "S14",
+      "name": "Static obstacle on the lane",
+      "passed": true,
+      "states": [
+        "STANDBY",
+        "NORMAL_CRUISE",
+        "EMERGENCY_STOP",
+        "NORMAL_CRUISE"
+      ],
+      "final": "NORMAL_CRUISE",
+      "checks": [
+        {
+          "check": "reaches EMERGENCY_STOP",
+          "ok": true
+        },
+        {
+          "check": "ends in NORMAL_CRUISE",
+          "ok": true
+        },
+        {
+          "check": "reason OBSTACLE",
+          "ok": true
+        },
+        {
+          "check": "no contact with obstacle",
+          "ok": true
+        },
+        {
+          "check": "stays within lane (|e| < 10 cm)",
+          "ok": true
+        },
+        {
+          "check": "brake_latency_ms <= 200.0 (got 38.0)",
+          "ok": true
+        }
+      ],
+      "lane_dev_true_cm": null,
+      "min_clearance_cm": 20.30815200892179,
+      "max_abs_e_cm": 3.28,
+      "metrics": {
+        "f1": null,
+        "blink_false_alarms": 0,
+        "lag_p95_ms": 5.61,
+        "lane_dev_stop_cm": null,
+        "brake_latency_ms": 38.0
+      }
+    },
+    {
+      "id": "S15",
+      "name": "Wi-Fi / heartbeat loss 1 s",
+      "passed": true,
+      "states": [
+        "STANDBY",
+        "NORMAL_CRUISE",
+        "EMERGENCY_STOP",
+        "NORMAL_CRUISE"
+      ],
+      "final": "NORMAL_CRUISE",
+      "checks": [
+        {
+          "check": "reaches EMERGENCY_STOP",
+          "ok": true
+        },
+        {
+          "check": "ends in NORMAL_CRUISE",
+          "ok": true
+        },
+        {
+          "check": "reason HEARTBEAT_LOSS",
+          "ok": true
+        },
+        {
+          "check": "stays within lane (|e| < 10 cm)",
+          "ok": true
+        },
+        {
+          "check": "brake_latency_ms <= 200.0 (got 178.2)",
+          "ok": true
+        }
+      ],
+      "lane_dev_true_cm": null,
+      "min_clearance_cm": null,
+      "max_abs_e_cm": 2.9,
+      "metrics": {
+        "f1": null,
+        "blink_false_alarms": 0,
+        "lag_p95_ms": 4.62,
+        "lane_dev_stop_cm": null,
+        "brake_latency_ms": 178.2
+      }
+    },
+    {
+      "id": "S16",
+      "name": "Lane markings lost (tape gap)",
+      "passed": true,
+      "states": [
+        "STANDBY",
+        "NORMAL_CRUISE",
+        "EMERGENCY_STOP"
+      ],
+      "final": "EMERGENCY_STOP",
+      "checks": [
+        {
+          "check": "reaches EMERGENCY_STOP",
+          "ok": true
+        },
+        {
+          "check": "ends in EMERGENCY_STOP",
+          "ok": true
+        },
+        {
+          "check": "reason LANE_LOST",
+          "ok": true
+        },
+        {
+          "check": "stays within lane (|e| < 10 cm)",
+          "ok": true
+        },
+        {
+          "check": "brake_latency_ms <= 200.0 (got 3.0)",
+          "ok": true
+        }
+      ],
+      "lane_dev_true_cm": null,
+      "min_clearance_cm": null,
+      "max_abs_e_cm": 0.28,
+      "metrics": {
+        "f1": null,
+        "blink_false_alarms": 0,
+        "lag_p95_ms": 4.43,
+        "lane_dev_stop_cm": null,
+        "brake_latency_ms": 3.0
+      }
+    }
+  ],
+  "aggregate": {
+    "f1": {
+      "value": 1.0,
+      "target": ">= 0.9",
+      "pass": true
+    },
+    "blink_false_alarms": {
+      "value": 0,
+      "target": "== 0",
+      "pass": true
+    },
+    "lag_p95_ms": {
+      "value": 5.78,
+      "target": "<= 100.0",
+      "pass": true
+    },
+    "lane_dev_stop_cm": {
+      "value": 1.15,
+      "target": "<= 5.0",
+      "pass": true
+    },
+    "brake_latency_ms": {
+      "value": 178.2,
+      "target": "<= 200.0",
+      "pass": true
+    },
+    "_counts": {
+      "tp": 7,
+      "fp": 0,
+      "fn": 0
+    }
+  },
+  "passed": 16,
+  "total": 16
+}

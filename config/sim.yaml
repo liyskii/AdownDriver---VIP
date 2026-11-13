@@ -1,0 +1,3 @@
+# Everything on localhost (laptop development / demo)
+network: {node1_ip: 127.0.0.1, node2_ip: 127.0.0.1, dashboard_ip: 127.0.0.1}
+hardware: {gpio_enabled: "no", oled_enabled: "no"}

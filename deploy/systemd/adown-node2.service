@@ -1,0 +1,20 @@
+[Unit]
+Description=AdownDriver Node 2 - TurtleBot vehicle control
+After=network-online.target turtlebot3-bringup.service
+Wants=network-online.target
+
+[Service]
+User=__USER__
+WorkingDirectory=__REPO__
+Environment=PYTHONUNBUFFERED=1
+Environment=TURTLEBOT3_MODEL=burger
+Environment=ROS_DOMAIN_ID=30
+ExecStart=/bin/bash -c 'source /opt/ros/humble/setup.bash && exec __REPO__/.venv/bin/python -m adowndriver node2'
+Restart=always
+RestartSec=2
+# motors are zeroed on SIGTERM; give the process time to do it
+KillSignal=SIGINT
+TimeoutStopSec=5
+
+[Install]
+WantedBy=multi-user.target

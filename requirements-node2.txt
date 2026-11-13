@@ -1,0 +1,7 @@
+# Node 2 - TurtleBot 3 (Ubuntu 22.04 + ROS 2 Humble). rclpy/geometry_msgs come from apt (ros-humble-*).
+# picamera2 is optional (apt: python3-picamera2 on Raspberry Pi OS); on Ubuntu the V4L2 path is used.
+-r requirements.txt
+vl53l1x>=0.0.5                # Pimoroni VL53L1X driver (smbus2)
+smbus2>=0.4
+gpiozero>=2.0
+lgpio>=0.2; platform_machine == "aarch64"

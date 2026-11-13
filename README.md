@@ -1,52 +1,129 @@
-# 🚗 AdownDriver: Drowsiness-Aware Autonomous Vehicle Safety System
+# AdownDriver — drowsiness-aware supervisory control for a TurtleBot 3
 
-[![VIP Coursework](https://img.shields.io/badge/Inha_University-VIP_Project_2026-005baa?style=for-the-badge)](https://www.inha.ac.kr)
-[![Track T4](https://img.shields.io/badge/Track_T4-Autonomous_Vehicle_%26_Deep_Learning-success?style=for-the-badge)]()
-[![Platform](https://img.shields.io/badge/Hardware-Dual_Raspberry_Pi_4B_%2B_TurtleBot_3-orange?style=for-the-badge)]()
-[![Python](https://img.shields.io/badge/Python-3.10%2B_%7C_ROS_2_%7C_MediaPipe_%7C_OpenCV-blue?style=for-the-badge)]()
+[![VIP](https://img.shields.io/badge/Inha_University-VIP_2026-005baa)](https://www.inha.ac.kr)
+[![Track](https://img.shields.io/badge/Track_T4-Autonomous_Vehicle_%26_DL-success)]()
+[![Hardware](https://img.shields.io/badge/2×_Raspberry_Pi_4B-TurtleBot_3_Burger-orange)]()
+[![SIL](https://img.shields.io/badge/SIL_validation-16%2F16_scenarios-brightgreen)](logs/validation/REPORT.md)
 
-> **Course:** Vertically Integrated Projects (VIP) — Fall 2026, School of Global Convergence Studies, Inha University  
-> **Academic Advisor:** Prof. Mehdi Pirahandeh[cite: 3]  
-> **Team:** **#Matigoat** (11 Members | Team Leader: **Li Vladislav**, `12250245`)[cite: 5]
+**Team #Matigoat** · Advisor Prof. Mehdi Pirahandeh · Leader Li Vladislav (12250245)
 
----
+A volunteer sits at a **cockpit station** (Node 1: Raspberry Pi 4B + Logitech C270). Node 1 tracks
+the face with MediaPipe and streams eye/mouth state at 50 Hz to the **TurtleBot 3** (Node 2), which
+follows a taped lane with its Pi Camera V2 and watches the road with a VL53L1X laser sensor. When
+the driver gets drowsy the robot does not just beep: it steps through a **graduated safe stop** —
+WARNING → SPEED_REDUCTION → CONTROLLED_STOP — and stops centred in its lane. Obstacles, Wi-Fi loss
+or lost lane markings trigger an immediate EMERGENCY_STOP.
 
-## 📌 1. Project Overview & Core Innovations
-
-**AdownDriver** is a distributed, dual-node drowsiness-aware supervisory control and autonomous safety prototype built on a **TurtleBot 3** mobile robot platform and a dedicated **Raspberry Pi 4B IoT Cockpit Station**[cite: 5].
-
-Conventional low-cost Driver Monitoring Systems (DMS) operate as isolated *open-loop* alarms. **AdownDriver** closes the control loop by executing a verifiable **Graduated Safe-Stop Envelope**[cite: 5]:
-
-1. **Distributed Dual-Pi Edge Architecture:** Splits high-FPS facial landmark deep learning (**Node 1**) from real-time road lane segmentation and motor control (**Node 2**) over a 50 Hz low-latency UDP telemetry link[cite: 5].
-2. **Volunteer / Synchronized Cockpit Testbed:** A live human operator sits at the stationary **Node 1 Cockpit DMS Station**, streaming real-time alertness states to the moving **Node 2 TurtleBot 3** on the test track[cite: 4].
-3. **Decoupled Confidence Metrics & Hysteresis:** Separates driver landmark visibility confidence ($C_{	ext{driver}}$) from road lane visibility confidence ($C_{	ext{lane}}$) and enforces strict persistence timers to achieve a **0% false-positive rate** during normal blinking ($< 400	ext{ ms}$)[cite: 4, 5].
-4. **Mandatory SQLite & CSV Audit Logging:** Every state transition, `EAR`/`MAR` trace, lateral offset ($e_y$), obstacle distance ($d_{	ext{obs}}$), and stop reason code is automatically recorded to `logs/validation_trial_results.csv` and `logs/adown_audit.db`[cite: 4, 5].
+![dashboard](docs/img/dashboard.png)
 
 ---
 
-## 🏗️ 2. System Architecture & Hardware Stack
+## 1 · Try it in 2 minutes (no hardware)
 
-| Subsystem Layer | Hardware Components | Software & Frameworks | Primary Engineering Function |
-| :--- | :--- | :--- | :--- |
-| **Node 1: Cockpit DMS Station** | Raspberry Pi 4B (IoT Kit), Logitech C270 HD USB Webcam, 0.96\" OLED Display | Python 3, MediaPipe Face Landmarker (TFLite), NumPy, UDP Socket | 30 FPS facial landmark extraction (468 points), bilateral `EAR` & `MAR` calculation, EMA filtering ($lpha=0.35$), and $C_{	ext{driver}}$ streaming[cite: 4, 5]. |
-| **Node 2: Mobile Vehicle Base** | TurtleBot 3 (RPi 4B + OpenCR 1.0 + Dynamixel XL430), Pi Camera V2 (CSI) | ROS 2, OpenCV (`warpPerspective`, HSV/Canny), PID Steering Controller | Bird's-eye lane segmentation, lateral centroid offset ($e_y$) tracking, $C_{	ext{lane}}$ evaluation, and velocity profiling[cite: 4, 5]. |
-| **Active Safety Peripherals** | VL53L1X ToF Laser Sensor, Active/Passive Buzzer, RGB/Status LEDs, Push-Button Reset | RPi.GPIO / I2C Interface, Hardware Watchdog Timer | Independent collision override ($d_{	ext{obs}} < 20	ext{ cm}$), multi-stage acoustic/LED warnings, and heartbeat loss braking ($\le 200	ext{ ms}$)[cite: 4, 5]. |
-| **Telemetry, Logging & HMI** | SanDisk Extreme 64GB microSDXC, Custom 3D-Printed Brackets (SGCS MakerBot M-124) | FastAPI, Uvicorn, SQLite3, CSV Audit Logger, Autodesk Fusion 360 | Real-time web dashboard visualization (`http://127.0.0.1:8000`) and reproducible experimental validation logging[cite: 4, 5]. |
+```bash
+git clone https://github.com/liyskii/AdownDriver---VIP.git && cd AdownDriver---VIP
+python3 -m venv .venv && source .venv/bin/activate        # Windows: .venv\Scripts\activate
+pip install -r requirements.txt
+python -m adowndriver --config config/sim.yaml demo        # simulated robot + synthetic driver + dashboard
+```
 
----
+Open **http://127.0.0.1:8000** → press **START** → in *Cockpit / driver* click **closed** (synthetic
+driver closes the eyes) and watch the graduated stop; *Simulator tools* place obstacles, drop the
+Wi-Fi, add glare, etc.
+Use your own face instead of the synthetic driver: `pip install mediapipe opencv-python` and
+`python -m adowndriver --config config/sim.yaml demo --source 0`.
 
-## 👥 3. Team #Matigoat — Member Roles & Responsibilities
+Run the full 16-scenario validation: `python -m adowndriver validate --plot` (≈ 2 min, report in `logs/validation/`).
 
-| Student ID | Name | Assigned Engineering Subsystem & Role |
-| :---: | :--- | :--- |
-| **`12250245`** | **Li Vladislav** *(Leader)* | System Architecture, Supervisory Safety FSM & Distributed Dual-Pi Integration[cite: 5] |
-| **`12250249`** | **Li Andrey** | Driver Monitoring Vision Pipeline (MediaPipe Face Mesh, `EAR`/`MAR` & EMA Filtering)[cite: 5] |
-| **`12250247`** | **Pak Nikita** | Forward Road Perception, OpenCV Perspective Warp, Lane Centroid & $C_{	ext{lane}}$[cite: 5] |
-| **`12240192`** | **Vadim Lifrov** | Embedded Systems, ROS 2 TurtleBot 3 Actuation & Inter-Pi UDP Telemetry[cite: 5] |
-| **`12240198`** | **Hsu Shwe Sin Htun** | Real-Time Operator Web Dashboard & HMI Visualization (FastAPI)[cite: 5] |
-| **`12240221`** | **Egamberdiev Saidumar** | Hardware Assembly, ToF Sensor / Buzzer / LED Wiring & Power Regulation[cite: 5] |
-| **`12240236`** | **Husan Tulaev** | Backend Telemetry Aggregation & Structured SQLite / CSV Audit Logging[cite: 5] |
-| **`12225243`** | **Dilshod Obidov** | Experimental Validation, 16-Scenario Fault-Injection Testing & Latency Auditing[cite: 4, 5] |
-| **`12240234`** | **Fazliddin Igamberdiev** | 3D CAD Design (Autodesk Fusion 360) & 3D-Printed Mounts (SGCS MakerBot M-124)[cite: 5, 6] |
-| **`12225262`** | **Arsen Baktybek uulu** | Safety Fallback Logic, Decoupled Confidence Matrix ($C_{	ext{driver}}$, $C_{	ext{lane}}$) & Watchdog[cite: 5] |
-| **`12240216`** | **Sevinchxon Khoshimova** | Technical Documentation, Quantitative Metric Verification & Demo Video Production[cite: 5] |
+## 2 · On the real robot
+
+| | Node 1 — cockpit (IoT-kit Pi 4B) | Node 2 — TurtleBot 3 |
+|---|---|---|
+| OS | Raspberry Pi OS Bookworm 64-bit | Ubuntu 22.04 + ROS 2 Humble (ROBOTIS image) |
+| Install | `bash deploy/setup_node1.sh` | `bash deploy/setup_node2.sh` |
+| Check | `python -m adowndriver check --role node1` | `python -m adowndriver check --role node2` |
+| Run | `python -m adowndriver node1` (HUD window) | `ros2 launch turtlebot3_bringup robot.launch.py` then `python -m adowndriver node2` and `python -m adowndriver dashboard` |
+| Autostart | `systemctl enable adown-node1` (done by setup) | `adown-node2`, `adown-dashboard` (done by setup) |
+
+1. Wire the peripherals → [docs/HARDWARE_WIRING.md](docs/HARDWARE_WIRING.md). Print the mounts → [cad_models/](cad_models/CAD_SPECIFICATIONS.md).
+2. Configure the travel router and IPs → [docs/NETWORK.md](docs/NETWORK.md), `config/default.yaml`.
+3. Calibrate the road camera once: `python3 tools/calibrate_lane.py` (4 clicks) and paste the result into `config/default.yaml`.
+4. Open `http://<node2-ip>:8000` on a laptop or phone. Calibrate the driver (button A or *Calibrate*), place the robot, **START**.
+
+### Operator controls
+
+| Action | Dashboard | Hardware |
+|---|---|---|
+| Start / soft stop | START / STOP | — |
+| Emergency stop (latched) | E-STOP or **Space** (floating button on phones) | Node 2 button A |
+| Reset after a stop | RESET | Node 2 button B · driver ACK = Node 1 button B (only when the driver is alert) |
+| Driver calibration (5 s) | Calibrate | Node 1 button A |
+| Scored trial | *Trials* → Start recording → Stop & score | — |
+| Live tuning | *Settings* (thresholds, speeds, PID) | — |
+
+## 3 · How it works
+
+```
+Node 1 (cockpit)                         Node 2 (TurtleBot 3)
+C270 → FaceLandmarker → EAR/MAR/yaw  ─50 Hz UDP─►  Safety FSM ◄─ VL53L1X (30 Hz)
+       C_driver, per-driver TH_EAR                      ▲     ◄─ Pi Cam V2 → bird's-eye lane (e, ψ, κ, C_lane)
+buzzer/LED/OLED ◄──── state 20 Hz ────────────────      │
+                                                  velocity profiler + lane-keeping (FF+PID) → /cmd_vel
+                    dashboard (FastAPI, WebSocket) ◄── telemetry, video, audit DB (SQLite/CSV)
+```
+
+| State | Trigger | Speed | Cockpit |
+|---|---|---|---|
+| STANDBY | power-up, RESET | 0 | blue |
+| NORMAL_CRUISE | driver alert | 0.16 m/s | green |
+| WARNING | eyes closed ≥ 1.2 s · yawn ≥ 0.8 s · PERCLOS ≥ 25 % · looking away ≥ 2 s | 0.16 | yellow, beep 1 Hz |
+| SPEED_REDUCTION | closed ≥ 2.5 s · 3 yawns/min · face not visible ≥ 0.5 s | 0.08 | orange, fast beep |
+| CONTROLLED_STOP | closed ≥ 4 s · driver missing ≥ 5 s | ramp −0.06 m/s², lane keeping on | red, continuous |
+| EMERGENCY_STOP | obstacle < 20 cm · heartbeat > 150 ms · lane lost > 0.3 s · ToF fault · E-STOP | 0 immediately | red |
+
+Blinks (< 0.4 s) can never escalate: the timer measures **continuous** closure. Details, maths and
+diagrams: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md). Everything we changed relative to the midterm
+specification and why: [docs/SPEC_REVISION.md](docs/SPEC_REVISION.md).
+
+## 4 · Acceptance metrics
+
+| # | Metric | Target | SIL result (16 scenarios) | Arena |
+|---|---|---|---|---|
+| M1 | Drowsiness detection F1 | ≥ 0.90 | 1.00 | guided protocol, [docs/VALIDATION_PROTOCOL.md](docs/VALIDATION_PROTOCOL.md) |
+| M2 | Blink false alarms (slow-down/stop) | 0 | 0 | " |
+| M3 | Processing lag per frame (p95) | ≤ 100 ms | Node 2 pipeline < 10 ms (dev PC) | measured per tick on both Pis |
+| M4 | Lane deviation during controlled stop | ≤ ±5 cm | 1.1 cm (ground truth) | camera estimate + tape mark |
+| M5 | Obstacle / disconnect braking | ≤ 200 ms | 179 ms worst case (link) | `BRAKE` events |
+
+SIL numbers come from the simulator and are a regression check, **not** a substitute for the arena
+trials (M3 for Node 1 in particular must be measured on the Pi). Every run — simulated or real —
+is stored in `logs/adown_audit.db` and can be exported as CSV from the *Trials* tab or with
+`python -m adowndriver report <run_id>`.
+
+## 5 · Development
+
+```bash
+pip install -r requirements-dev.txt
+pytest -q                               # 53 tests: FSM, lane detector, control, analyzer, audit, SIL
+python -m adowndriver validate S08 --plot
+python cad_models/generate_stl.py       # rebuild the printable parts
+```
+
+Repository map: `adowndriver/` (code), `config/` (YAML, driver profiles, guided protocols),
+`docs/`, `tests/`, `tools/`, `cad_models/`, `deploy/`, `logs/` (audit DB, CSV, validation report).
+
+## 6 · Team
+
+| ID | Name | Responsibility |
+|:---:|---|---|
+| 12250245 | **Li Vladislav** (leader) | Architecture, safety FSM, dual-Pi integration |
+| 12250249 | Li Andrey | Node 1 vision: FaceLandmarker, EAR/MAR, EMA, calibration |
+| 12250247 | Pak Nikita | Node 2 road perception, bird's-eye warp, lane keeping |
+| 12240192 | Vadim Lifrov | Embedded / UDP telemetry, ROS 2 actuation, deployment |
+| 12240198 | Hsu Shwe Sin Htun | Operator dashboard (FastAPI) |
+| 12240221 | Egamberdiev Saidumar | Hardware assembly: ToF, buzzers, LEDs, power |
+| 12240236 | Husan Tulaev | SQLite/CSV audit logging |
+| 12225243 | Dilshod Obidov | Validation: simulator, 16 scenarios, fault injection |
+| 12240234 | Fazliddin Igamberdiev | CAD: parametric 3D-printed mounts |
+| 12225262 | Arsen Baktybek uulu | Confidence matrix, faults & watchdog |
+| 12240216 | Sevinchxon Khoshimova | Documentation, compliance, demo video |

@@ -1,0 +1,5 @@
+-r requirements.txt
+pytest>=7
+httpx>=0.25                   # FastAPI test client
+manifold3d>=2.4               # cad_models/generate_stl.py
+trimesh>=4.0

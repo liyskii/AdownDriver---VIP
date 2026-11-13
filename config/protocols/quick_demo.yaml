@@ -1,0 +1,8 @@
+# 60-second demo for presentations / the final video: shows the full graduated safe stop.
+name: quick_demo
+steps:
+  - {cue: "Look at the camera, blink normally", duration: 12, label: alert}
+  - {cue: "YAWN now",                           duration: 5,  label: yawn}
+  - {cue: "Eyes open",                          duration: 8,  label: alert}
+  - {cue: "CLOSE YOUR EYES - keep them closed", duration: 8,  label: drowsy}
+  - {cue: "Open your eyes. Operator: RESET",    duration: 27, label: alert}

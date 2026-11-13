@@ -1,0 +1,31 @@
+# AdownDriver configuration (merged over the defaults in adowndriver/config.py).
+# Copy to config/local.yaml for per-machine changes and run with --config config/local.yaml.
+
+network:
+  # Static DHCP leases on the travel router (docs/NETWORK.md)
+  node1_ip: 192.168.8.10        # Cockpit DMS station (Raspberry Pi 4B, IoT kit)
+  node2_ip: 192.168.8.20        # TurtleBot 3 Burger
+  dashboard_ip: 192.168.8.20    # dashboard runs on Node 2 by default; use your laptop IP if it runs there
+
+driver:
+  camera_index: 0               # Logitech C270
+  camera_width: 640
+  camera_height: 480
+
+camera:                         # Pi Camera V2 on the 25 deg 3D-printed mount
+  height_m: 0.195
+  pitch_deg: 25.0
+
+lane:
+  lane_width_m: 0.30            # centre-to-centre distance of yellow (left) and white (right) tape
+  # After running tools/calibrate_lane.py paste the 4 clicked pixel points here:
+  # src_points: [[u1,v1],[u2,v2],[u3,v3],[u4,v4]]
+
+vehicle:
+  camera_source: auto           # picamera2 -> v4l2:0 -> gstreamer
+  motor_driver: auto            # ros2 if rclpy is importable
+  cmd_vel_stamped: false        # true on ROS 2 Jazzy TurtleBot3 images
+
+fsm:
+  V_NORMAL: 0.16
+  V_REDUCED: 0.08

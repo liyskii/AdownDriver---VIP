@@ -1,8 +1,7 @@
-﻿opencv-python>=4.5.0
-mediapipe>=0.10.0
-numpy>=1.20.0
-fastapi>=0.68.0
-uvicorn>=0.15.0
-pyserial>=3.5
-matplotlib>=3.3.0
-pandas>=1.2.0
+# Core (laptop, dashboard, simulator, both nodes)
+numpy>=1.24
+opencv-python-headless>=4.8   # use opencv-python on Node 1 if you want the HUD window
+pyyaml>=6.0
+fastapi>=0.110
+uvicorn>=0.27
+matplotlib>=3.7               # validation plots

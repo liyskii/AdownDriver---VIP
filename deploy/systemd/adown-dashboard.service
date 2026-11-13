@@ -1,0 +1,14 @@
+[Unit]
+Description=AdownDriver operator dashboard (http://<node2>:8000)
+After=network-online.target
+
+[Service]
+User=__USER__
+WorkingDirectory=__REPO__
+Environment=PYTHONUNBUFFERED=1
+ExecStart=__REPO__/.venv/bin/python -m adowndriver dashboard
+Restart=always
+RestartSec=2
+
+[Install]
+WantedBy=multi-user.target

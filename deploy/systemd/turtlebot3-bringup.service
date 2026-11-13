@@ -1,0 +1,15 @@
+# Optional: start the TurtleBot3 base driver at boot (otherwise: ros2 launch turtlebot3_bringup robot.launch.py)
+[Unit]
+Description=TurtleBot3 bringup (OpenCR + motors)
+After=network-online.target
+
+[Service]
+User=__USER__
+Environment=TURTLEBOT3_MODEL=burger
+Environment=ROS_DOMAIN_ID=30
+Environment=LDS_MODEL=LDS-02
+ExecStart=/bin/bash -c 'source /opt/ros/humble/setup.bash && source ~/turtlebot3_ws/install/setup.bash && exec ros2 launch turtlebot3_bringup robot.launch.py'
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

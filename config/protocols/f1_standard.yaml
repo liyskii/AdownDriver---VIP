@@ -1,0 +1,20 @@
+# Guided arena protocol for the F1 / false-alarm metrics (≈ 3 min).
+# The cue is shown on the Node 1 HUD, OLED and dashboard; `label` is written to
+# every logged tick as ground truth:  alert | drowsy | yawn | distracted | absent
+name: f1_standard
+steps:
+  - {cue: "Look at the road screen, blink normally", duration: 20, label: alert}
+  - {cue: "CLOSE YOUR EYES (1.8 s)",                  duration: 1.8, label: drowsy}
+  - {cue: "Eyes open, relax",                         duration: 12, label: alert}
+  - {cue: "Read the text aloud",                      duration: 20, label: alert}
+  - {cue: "YAWN now",                                 duration: 5, label: yawn}
+  - {cue: "Eyes open, relax",                         duration: 15, label: alert}
+  - {cue: "Blink fast (every 2 s)",                   duration: 15, label: alert}
+  - {cue: "CLOSE YOUR EYES (3 s)",                    duration: 3, label: drowsy}
+  - {cue: "Eyes open, relax",                         duration: 15, label: alert}
+  - {cue: "Look at the left wall",                    duration: 3, label: distracted}
+  - {cue: "Look at the road screen",                  duration: 12, label: alert}
+  - {cue: "CLOSE YOUR EYES until the robot stops",    duration: 8, label: drowsy}
+  - {cue: "Eyes open - operator: RESET, START",       duration: 20, label: alert}
+  - {cue: "YAWN now",                                 duration: 5, label: yawn}
+  - {cue: "Eyes open, relax",                         duration: 15, label: alert}

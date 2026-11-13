@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AdownDriver Console</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%2314b8a6'/%3E%3Cpath d='M8 22l8-13 8 13' stroke='white' stroke-width='3' fill='none'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="brand"><span class="logo">A</span><div><b>AdownDriver</b><small>Operator console · Team #Matigoat</small></div></div>
+  <nav class="tabs" id="tabs">
+    <button data-tab="live" class="active">Live</button>
+    <button data-tab="trials">Trials</button>
+    <button data-tab="validation">Validation</button>
+    <button data-tab="settings">Settings</button>
+    <button data-tab="help">Help</button>
+  </nav>
+  <div class="pills">
+    <span class="pill" id="pill-n1" title="Node 1 - cockpit DMS station">Node 1</span>
+    <span class="pill" id="pill-n2" title="Node 2 - TurtleBot 3">Node 2</span>
+    <span class="pill" id="pill-link" title="Driver link heartbeat age / round-trip time">Link</span>
+    <span class="pill" id="pill-rec" title="Audit recording">REC</span>
+    <span class="pill" id="pill-ws" title="Browser connection to dashboard">WS</span>
+  </div>
+</header>
+
+<main>
+<!-- ============================ LIVE ============================ -->
+<section id="tab-live" class="tab active">
+  <div class="live-grid">
+    <div class="col">
+      <div class="card state-card" id="stateCard">
+        <div class="label">Supervisory state</div>
+        <div class="state-name" id="stateName">—</div>
+        <div class="state-reason" id="stateReason">waiting for Node 2…</div>
+        <div class="speed">
+          <div><span id="vcmd">0.000</span><small> m/s</small></div>
+          <div class="muted small">ω <span id="omega">0.00</span> rad/s · target <span id="vtarget">0.00</span></div>
+        </div>
+        <div class="bar"><div id="vbar"></div></div>
+        <div class="cap small" id="capReason"></div>
+      </div>
+
+      <div class="card">
+        <div class="label">Controls <span class="muted small">(Space = E-STOP)</span></div>
+        <div class="controls">
+          <button class="btn go" id="btnStart">START</button>
+          <button class="btn" id="btnStop">STOP</button>
+          <button class="btn info" id="btnReset">RESET</button>
+          <button class="btn danger big" id="btnEstop">E-STOP</button>
+        </div>
+        <ul class="ready" id="ready"></ul>
+        <div class="ack small muted" id="ack"></div>
+      </div>
+
+      <div class="card">
+        <div class="label">Fatigue ladder <span class="muted small">continuous eye closure</span></div>
+        <div class="ladder"><div id="ladderFill"></div>
+          <i style="left:30%" title="T_WARN"></i><i style="left:62.5%" title="T_SLOW"></i><i style="left:100%" title="T_STOP"></i>
+        </div>
+        <div class="ladder-labels small muted"><span>0 s</span><span id="lw">WARN 1.2</span><span id="ls">SLOW 2.5</span><span id="lst">STOP 4.0</span></div>
+        <div class="kv small"><span>closed</span><b id="tClosed">0.00 s</b><span>alert for</span><b id="tAlert">0.0 s</b>
+          <span>PERCLOS</span><b id="perclos">0 %</b><span>yawns / min</span><b id="yawns">0</b>
+          <span>low C_driver</span><b id="tLow">0.0 s</b><span>looking away</span><b id="tDist">0.0 s</b></div>
+      </div>
+    </div>
+
+    <div class="col wide">
+      <div class="videos">
+        <figure class="card video"><figcaption>Driver camera · Node 1 <span id="n1fps" class="muted"></span></figcaption>
+          <img id="vid1" alt=""><div class="nosignal" id="ns1">no signal</div></figure>
+        <figure class="card video"><figcaption>Road camera + bird's-eye · Node 2 <span id="laneMode" class="muted"></span></figcaption>
+          <img id="vid2" alt=""><div class="nosignal" id="ns2">no signal</div></figure>
+      </div>
+      <div class="card">
+        <div class="label row">Live signals (60 s)
+          <span class="legend" id="legend"></span></div>
+        <canvas id="chart" height="190"></canvas>
+      </div>
+      <div class="card events-card">
+        <div class="label">Event log</div>
+        <ol class="events" id="events"></ol>
+      </div>
+    </div>
+
+    <div class="col">
+      <div class="tiles">
+        <div class="tile" id="tEar"><span>EAR</span><b>—</b><div class="meter"><div></div><i></i></div><small>threshold —</small></div>
+        <div class="tile" id="tMar"><span>MAR</span><b>—</b><div class="meter"><div></div><i></i></div><small>yawn &gt; 0.60</small></div>
+        <div class="tile" id="tCd"><span>C<sub>driver</sub></span><b>—</b><div class="meter"><div></div><i style="left:65%"></i></div><small>face · pose · light</small></div>
+        <div class="tile" id="tCl"><span>C<sub>lane</sub></span><b>—</b><div class="meter"><div></div><i style="left:65%"></i></div><small id="laneWidth">lane —</small></div>
+        <div class="tile" id="tD"><span>Obstacle d</span><b>—</b><div class="meter zones"><div></div></div><small>stop &lt; 20 · slow &lt; 45 cm</small></div>
+        <div class="tile" id="tE"><span>Lateral e<sub>y</sub></span><b>—</b><div class="meter center"><div></div></div><small>±5 cm target</small></div>
+        <div class="tile" id="tLag"><span>Lag p.frame</span><b>—</b><small id="lagDetail">N1 — · N2 —</small></div>
+        <div class="tile" id="tLink"><span>Heartbeat</span><b>—</b><small id="linkDetail">RTT —</small></div>
+      </div>
+
+      <div class="card">
+        <div class="label">Cockpit / driver</div>
+        <div class="form-row"><input id="driverName" placeholder="driver name" value="default">
+          <button class="btn small-btn" id="btnCalib">Calibrate</button></div>
+        <div class="small muted" id="profile">profile —</div>
+        <div class="progress" id="calibBar"><div></div></div>
+        <div class="small" id="calibMsg"></div>
+        <div class="form-row"><select id="protocolSel"></select>
+          <button class="btn small-btn" id="btnProto">Start protocol</button>
+          <button class="btn small-btn" id="btnProtoStop">Stop</button></div>
+        <div class="cue" id="cue" hidden></div>
+        <div class="form-row"><button class="btn small-btn" id="btnAck">Driver ACK</button>
+          <label class="small"><input type="checkbox" id="mute"> mute cockpit buzzer</label></div>
+        <div id="simDriver" hidden>
+          <div class="label small">Synthetic driver</div>
+          <div class="chips" id="behaviours"></div>
+        </div>
+      </div>
+
+      <div class="card" id="simTools" hidden>
+        <div class="label">Simulator tools</div>
+        <div class="chips">
+          <button data-sim="obstacle" data-v="0.6">Obstacle 60 cm</button>
+          <button data-sim="clear">Clear obstacles</button>
+          <button data-sim="link_drop" data-v="1.0">Wi-Fi drop 1 s</button>
+          <button data-sim="glare" data-v="1" data-toggle>Glare</button>
+          <button data-sim="lens" data-v="1" data-toggle>Block lens</button>
+          <button data-sim="respawn">Respawn</button>
+        </div>
+        <label class="small">Lighting <input type="range" id="bright" min="0.2" max="1.4" step="0.05" value="1"></label>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ TRIALS ============================ -->
+<section id="tab-trials" class="tab">
+  <div class="split">
+    <div class="card">
+      <div class="label">Record a trial</div>
+      <label>Scenario<select id="trialScenario"></select></label>
+      <p class="small muted" id="trialProc"></p>
+      <div class="form-grid">
+        <label>Driver<input id="trialDriver" placeholder="volunteer"></label>
+        <label>Operator<input id="trialOperator" placeholder="operator"></label>
+      </div>
+      <label>Notes<input id="trialNotes" placeholder="lamp 50 %, mat B, …"></label>
+      <div class="form-row"><button class="btn go" id="btnRunStart">Start recording</button>
+        <button class="btn" id="btnRunStop">Stop &amp; score</button></div>
+      <p class="small muted">Recording logs every tick (20 Hz) and every event to SQLite; on stop the run is scored
+        against the five acceptance metrics and exported to <code>logs/runs/run_XXXX.csv</code>.</p>
+    </div>
+    <div class="card grow">
+      <div class="label row">Recorded runs <button class="btn small-btn" id="btnRefreshRuns">Refresh</button></div>
+      <div class="table-wrap"><table class="runs"><thead><tr><th>#</th><th>Started</th><th>Scenario</th><th>Source</th>
+        <th>Dur.</th><th>F1</th><th>Blink FA</th><th>Lag</th><th>Lane</th><th>Brake</th><th></th></tr></thead>
+        <tbody id="runsBody"></tbody></table></div>
+    </div>
+  </div>
+  <div class="card" id="runDetail" hidden>
+    <div class="label row"><span id="runTitle"></span><span class="legend small muted">EAR · v_cmd · C_lane · state</span></div>
+    <div class="metric-cards" id="runMetrics"></div>
+    <canvas id="runChart" height="220"></canvas>
+  </div>
+</section>
+
+<!-- ============================ VALIDATION ============================ -->
+<section id="tab-validation" class="tab">
+  <div class="card">
+    <div class="label row">Software-in-the-loop validation · 16 scenarios
+      <button class="btn go small-btn" id="btnValidate">Run all scenarios</button></div>
+    <p class="small muted">Runs the real lane detector, safety FSM and steering controller against the simulated track,
+      ToF sensor, Wi-Fi link and a scripted driver. Use it after every parameter change, before going to the arena.</p>
+    <div id="valStatus" class="small"></div>
+    <div class="metric-cards" id="valMetrics"></div>
+    <div class="table-wrap"><table class="runs"><thead><tr><th>ID</th><th>Scenario</th><th>State sequence</th>
+      <th>Lane dev. stop</th><th>Result</th><th>Plot</th></tr></thead><tbody id="valBody"></tbody></table></div>
+  </div>
+</section>
+
+<!-- ============================ SETTINGS ============================ -->
+<section id="tab-settings" class="tab">
+  <div class="card">
+    <div class="label">Runtime parameters <span class="muted small">— applied to Node 2 immediately, not saved to disk (edit config/default.yaml for permanent changes)</span></div>
+    <div id="params" class="params"></div>
+  </div>
+</section>
+
+<!-- ============================ HELP ============================ -->
+<section id="tab-help" class="tab">
+  <div class="split">
+    <div class="card">
+      <div class="label">Quick start</div>
+      <ol class="help">
+        <li>Power the travel router, then Node 1 and the TurtleBot. Both nodes start automatically (systemd).</li>
+        <li>Check the pills at the top: <b>Node 1</b>, <b>Node 2</b> and <b>Link</b> must be green.</li>
+        <li>Driver sits 45–55 cm from the C270 and presses <b>Calibrate</b> (or button A on the cockpit) — eyes open for 5 s.</li>
+        <li>Place the robot on the lane. The readiness list must be empty, then press <b>START</b>.</li>
+        <li>For a scored trial open <b>Trials</b>, pick the scenario, press <b>Start recording</b>, run it, press <b>Stop &amp; score</b>.</li>
+        <li>After CONTROLLED_STOP the driver must be alert for 1.5 s; then press <b>RESET</b> (or cockpit button B) and <b>START</b>.</li>
+      </ol>
+    </div>
+    <div class="card">
+      <div class="label">States</div>
+      <dl class="legend-list">
+        <dt class="s-STANDBY">STANDBY</dt><dd>Armed, not moving. Power-up state and after RESET.</dd>
+        <dt class="s-NORMAL_CRUISE">NORMAL CRUISE</dt><dd>Driver alert. 0.16 m/s with lane keeping.</dd>
+        <dt class="s-WARNING">WARNING</dt><dd>Eyes closed ≥ 1.2 s, a yawn, high PERCLOS or looking away ≥ 2 s. Intermittent beep.</dd>
+        <dt class="s-SPEED_REDUCTION">SPEED REDUCTION</dt><dd>Closure ≥ 2.5 s, 3 yawns/min or the face is not visible ≥ 0.5 s. 50 % speed.</dd>
+        <dt class="s-CONTROLLED_STOP">CONTROLLED STOP</dt><dd>Closure ≥ 4 s or driver missing ≥ 5 s. Ramps to 0 at 0.06 m/s² while staying in lane. Latched.</dd>
+        <dt class="s-EMERGENCY_STOP">EMERGENCY STOP</dt><dd>Obstacle &lt; 20 cm, heartbeat lost &gt; 150 ms, lane lost &gt; 0.3 s, ToF fault or E-STOP. Immediate stop.</dd>
+      </dl>
+    </div>
+  </div>
+</section>
+</main>
+<button class="btn danger" id="fabEstop">E-STOP</button>
+<div id="toast"></div>
+<script src="/static/app.js"></script>
+</body>
+</html>
