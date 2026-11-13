@@ -18,6 +18,32 @@ or lost lane markings trigger an immediate EMERGENCY_STOP.
 
 ---
 
+## 0 · Task launcher — pick any task or sub-task
+
+```bash
+python -m adowndriver --config config/sim.yaml ui     # opens http://127.0.0.1:8000/#tasks
+python -m adowndriver menu                            # same launcher as a terminal menu (SSH on a Pi)
+```
+
+The **Tasks** tab lists the 9 project tasks of the team plan and their 21 runnable sub-tasks
+(owner, where it runs, missing packages, expected duration). Choose one, set its parameters and
+press *Run* / *Start*: the output streams live, plots and reports open next to the log, and node
+services feed the **Live** tab. A five-step mission flow (check hardware → calibrate → validate in
+SIL → drive → score & report) and a search box (`/`) find the right sub-task quickly. Only commands
+from the catalogue (`adowndriver/launcher/catalog.py`) can be started and every parameter is validated.
+
+| Task | Owner(s) | Sub-tasks |
+|---|---|---|
+| T1 Driver monitoring (Node 1) | Andrey Li | webcam node, synthetic driver, EAR calibration, analyzer tests |
+| T2 Road perception & lane keeping | Nikita Pak | TurtleBot node, simulated track, homography tool, lane/control tests |
+| T3 Supervisory safety FSM | Li Vladislav, Arsen Baktybek uulu | FSM tests, one SIL scenario |
+| T4 Telemetry & audit | Vadim Lifrov, Husan Tulaev | protocol/audit tests, score a run → CSV |
+| T5 Operator HMI & demo | Hsu Shwe Sin Htun | one-click demo, demo with your own face |
+| T6 Hardware bring-up | Saidumar Egamberdiev, Vadim Lifrov | self-test Node 1 / Node 2 |
+| T7 CAD & 3D-printed mounts | Fazliddin Igamberdiev | regenerate 7 STL parts + preview |
+| T8 Validation & QA | Dilshod Obidov | 16-scenario SIL, all tests, regression gate |
+| T9 Documentation & evidence | Sevinchxon Khoshimova | evidence pack (`logs/evidence/EVIDENCE.md`) |
+
 ## 1 · Try it in 2 minutes (no hardware)
 
 ```bash
@@ -45,7 +71,7 @@ Run the full 16-scenario validation: `python -m adowndriver validate --plot` (�
 | Run | `python -m adowndriver node1` (HUD window) | `ros2 launch turtlebot3_bringup robot.launch.py` then `python -m adowndriver node2` and `python -m adowndriver dashboard` |
 | Autostart | `systemctl enable adown-node1` (done by setup) | `adown-node2`, `adown-dashboard` (done by setup) |
 
-1. Wire the peripherals → [docs/HARDWARE_WIRING.md](docs/HARDWARE_WIRING.md). Print the mounts → [cad_models/](cad_models/CAD_SPECIFICATIONS.md).
+1. Wire the peripherals → [docs/HARDWARE_WIRING.md](docs/HARDWARE_WIRING.md). Print the mounts and the two enclosures → [cad_models/](cad_models/CAD_SPECIFICATIONS.md).
 2. Configure the travel router and IPs → [docs/NETWORK.md](docs/NETWORK.md), `config/default.yaml`.
 3. Calibrate the road camera once: `python3 tools/calibrate_lane.py` (4 clicks) and paste the result into `config/default.yaml`.
 4. Open `http://<node2-ip>:8000` on a laptop or phone. Calibrate the driver (button A or *Calibrate*), place the robot, **START**.

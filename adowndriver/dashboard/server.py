@@ -9,6 +9,8 @@ Layer 4 HMI - FastAPI operator dashboard.
 * Sends operator commands (START / STOP / E-STOP / RESET, calibration,
   guided protocols, parameter changes, trial recording, simulator tools).
 * Serves the audit database: runs, metrics, CSV export, SIL validation.
+* Hosts the integrated task launcher ("Tasks" tab): every task / sub-task of the
+  project can be chosen and run from here, with live logs and output files.
 
 The dashboard is *not* in the safety loop: if it crashes or the browser
 disconnects the robot keeps running its FSM; E-STOP is also on a hardware button.
@@ -32,6 +34,9 @@ from ..audit.metrics import compute_metrics
 from ..audit.recorder import AuditRecorder
 from ..common.protocol import UdpEndpoint, decode, decode_preview
 from ..config import RUNTIME_TUNABLE, AppConfig, resolve_path
+from ..launcher.catalog import catalog as task_list
+from ..launcher.catalog import find as find_task
+from ..launcher.jobs import JobManager, repo_file
 from ..sim.scenarios import SCENARIOS
 
 STATIC = Path(__file__).parent / "static"
@@ -49,6 +54,7 @@ class Hub:
         self.history: collections.deque = collections.deque(maxlen=600)  # 60 s at 10 Hz
         self.cmd_log: collections.deque = collections.deque(maxlen=50)
         self.validation: dict = {"running": False, "report": None}
+        self.jobs = JobManager()
         n = cfg.network
         self.tel = UdpEndpoint(n.telemetry_port)
         self.tel.start_receiver(self._on_tel)
@@ -89,6 +95,7 @@ class Hub:
                 "age_ms": {k: round((now - t) * 1000) if t else None for k, t in self.t_rx.items()},
                 "addr": dict(self.addr), "server_t": int(time.time() * 1000),
                 "validation_running": self.validation["running"],
+                "jobs": self.jobs.active(),
             }
 
     def send(self, target: str, payload: dict) -> bool:
@@ -245,12 +252,70 @@ def create_app(cfg: Optional[AppConfig] = None) -> FastAPI:
     def commands():
         return list(hub.cmd_log)
 
+    # ------------------------------------------------------------ task launcher
+    @app.get("/api/tasks")
+    def tasks():
+        return {"tasks": task_list(), "jobs": hub.jobs.list()}
+
+    @app.post("/api/tasks/run")
+    def task_run(body: dict):
+        sub_id = str(body.get("id", ""))
+        values = body.get("params") or {}
+        try:
+            sub = find_task(sub_id)
+            if sub.kind == "command":
+                _, clean = sub.resolve(values)
+                payload = {k: v for k, v in sub.command.items() if k != "target"}
+                ok = hub.send(sub.command["target"], {**payload, **clean})
+                job = hub.jobs.record(sub, clean, ok, f"{payload['cmd']} {clean} -> {sub.command['target']} "
+                                                       f"({hub.addr[sub.command['target']]}): {'sent' if ok else 'send failed'}")
+            else:
+                job = hub.jobs.start(sub_id, values)
+        except KeyError as exc:
+            raise HTTPException(404, str(exc))
+        except (ValueError, RuntimeError) as exc:
+            raise HTTPException(400, str(exc))
+        return job.summary()
+
+    @app.get("/api/jobs")
+    def jobs():
+        return hub.jobs.list()
+
+    @app.get("/api/jobs/{job_id}")
+    def job_detail(job_id: int, since: int = 0):
+        job = hub.jobs.get(job_id)
+        if job is None:
+            raise HTTPException(404, "job not found")
+        return {**job.summary(), "log": job.tail(since)}
+
+    @app.post("/api/jobs/{job_id}/stop")
+    def job_stop(job_id: int):
+        return {"stopped": hub.jobs.stop(job_id)}
+
+    @app.get("/api/artifact")
+    def artifact(path: str):
+        try:
+            p = repo_file(path)
+        except FileNotFoundError:
+            raise HTTPException(404, "not found")
+        media = {".png": "image/png", ".md": "text/markdown; charset=utf-8", ".csv": "text/csv",
+                 ".json": "application/json", ".stl": "model/stl"}.get(p.suffix.lower(), "application/octet-stream")
+        return FileResponse(p, media_type=media, filename=p.name if p.suffix.lower() in (".csv", ".stl") else None)
+
+    import atexit
+    atexit.register(hub.jobs.stop_all)         # never leave launcher child processes behind
+
     return app
 
 
-def main(cfg: AppConfig) -> None:
+def main(cfg: AppConfig, open_browser: bool = False) -> None:
     import uvicorn
     app = create_app(cfg)
     print(f"[dashboard] http://{cfg.dashboard.host}:{cfg.dashboard.port}  (telemetry udp/{cfg.network.telemetry_port}, "
           f"preview udp/{cfg.network.preview_port})")
+    if open_browser:
+        import webbrowser
+        url = f"http://127.0.0.1:{cfg.dashboard.port}/#tasks"
+        threading.Timer(1.2, lambda: webbrowser.open(url)).start()
+        print(f"[dashboard] task launcher: {url}")
     uvicorn.run(app, host=cfg.dashboard.host, port=cfg.dashboard.port, log_level="warning")

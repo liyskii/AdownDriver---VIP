@@ -4,4 +4,5 @@ opencv-python-headless>=4.8   # use opencv-python on Node 1 if you want the HUD 
 pyyaml>=6.0
 fastapi>=0.110
 uvicorn>=0.27
+websockets>=12.0              # WebSocket support for uvicorn (live dashboard)
 matplotlib>=3.7               # validation plots

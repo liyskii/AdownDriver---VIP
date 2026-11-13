@@ -11,7 +11,8 @@
 <header class="topbar">
   <div class="brand"><span class="logo">A</span><div><b>AdownDriver</b><small>Operator console · Team #Matigoat</small></div></div>
   <nav class="tabs" id="tabs">
-    <button data-tab="live" class="active">Live</button>
+    <button data-tab="tasks" class="active">Tasks</button>
+    <button data-tab="live">Live</button>
     <button data-tab="trials">Trials</button>
     <button data-tab="validation">Validation</button>
     <button data-tab="settings">Settings</button>
@@ -22,13 +23,49 @@
     <span class="pill" id="pill-n2" title="Node 2 - TurtleBot 3">Node 2</span>
     <span class="pill" id="pill-link" title="Driver link heartbeat age / round-trip time">Link</span>
     <span class="pill" id="pill-rec" title="Audit recording">REC</span>
+    <span class="pill" id="pill-jobs" title="Running tasks started from the launcher">Jobs 0</span>
     <span class="pill" id="pill-ws" title="Browser connection to dashboard">WS</span>
   </div>
 </header>
 
 <main>
+<!-- ============================ TASKS (launcher) ============================ -->
+<section id="tab-tasks" class="tab active">
+  <div class="launch-hero card">
+    <div class="hero-top">
+      <div>
+        <div class="label">Task launcher</div>
+        <h2>Which task or sub-task do you want to run?</h2>
+        <p class="small muted">Every task of the team plan in one place. Pick a sub-task, set its parameters and run it on
+          this machine — logs stream live on the right, results appear as files and plots. Services (nodes) feed the
+          <b>Live</b> tab. Press <kbd>/</kbd> to search.</p>
+      </div>
+      <div class="machine small" id="machine"></div>
+    </div>
+    <input id="taskSearch" class="search" placeholder="Search: e.g. “lane”, “S08”, “Dilshod”, “calibrate”, “T3.2” …" autocomplete="off">
+    <ol class="flow" id="flow"></ol>
+  </div>
+  <div class="launch-grid">
+    <div id="taskList" class="task-list"></div>
+    <aside class="jobs-pane">
+      <div class="card">
+        <div class="label row">Jobs <span class="small muted" id="jobsCount"></span></div>
+        <ul class="jobs" id="jobList"><li class="muted small">Nothing has been run yet.</li></ul>
+      </div>
+      <div class="card console-card" id="consoleCard" hidden>
+        <div class="label row"><span id="consoleTitle"></span>
+          <span><button class="btn small-btn" id="btnGoLive" hidden>Open Live</button>
+          <button class="btn small-btn danger" id="btnJobStop">Stop</button></span></div>
+        <div class="small muted mono" id="consoleCmd"></div>
+        <pre class="console" id="console"></pre>
+        <div class="artifacts" id="artifacts"></div>
+      </div>
+    </aside>
+  </div>
+</section>
+
 <!-- ============================ LIVE ============================ -->
-<section id="tab-live" class="tab active">
+<section id="tab-live" class="tab">
   <div class="live-grid">
     <div class="col">
       <div class="card state-card" id="stateCard">
@@ -216,5 +253,6 @@
 <button class="btn danger" id="fabEstop">E-STOP</button>
 <div id="toast"></div>
 <script src="/static/app.js"></script>
+<script src="/static/tasks.js"></script>
 </body>
 </html>

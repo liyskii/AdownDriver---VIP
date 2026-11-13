@@ -8,6 +8,8 @@ AdownDriver command-line entry point.
     python -m adowndriver validate [S01 ...] [--plot]
     python -m adowndriver report RUN_ID        # score a recorded run
     python -m adowndriver check                # hardware / dependency self-test
+    python -m adowndriver ui                   # task launcher in the browser (all tasks / sub-tasks)
+    python -m adowndriver menu                 # the same launcher as a terminal menu (SSH on a Pi)
 
 Every sub-command accepts ``--config file.yaml`` (merged over config/default.yaml).
 """
@@ -86,6 +88,16 @@ def _check(cfg, a):
     run_selftest(cfg, a.role)
 
 
+def _ui(cfg, a):
+    from .dashboard.server import main
+    main(cfg, open_browser=not a.no_browser)
+
+
+def _menu(cfg, a):
+    from .launcher.menu import run_menu
+    run_menu(cfg)
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(prog="adowndriver", description="AdownDriver - drowsiness-aware TurtleBot 3")
     ap.add_argument("--config", help="YAML file merged over config/default.yaml")
@@ -113,6 +125,10 @@ def main(argv=None):
     p = sub.add_parser("check", help="hardware & dependency self-test")
     p.add_argument("--role", choices=["node1", "node2"], default="node2")
     p.set_defaults(fn=_check)
+    p = sub.add_parser("ui", help="task launcher: pick any task / sub-task in the browser")
+    p.add_argument("--no-browser", action="store_true")
+    p.set_defaults(fn=_ui)
+    sub.add_parser("menu", help="task launcher as a terminal menu").set_defaults(fn=_menu)
     a = ap.parse_args(argv)
     cfg = load_config(a.config)
     a.fn(cfg, a)

@@ -1,5 +1,5 @@
 {
-  "generated": "2026-11-13 19:55:59",
+  "generated": "2026-11-13 20:45:18",
   "scenarios": [
     {
       "id": "S01",
@@ -46,7 +46,7 @@
       "metrics": {
         "f1": null,
         "blink_false_alarms": 0,
-        "lag_p95_ms": 5.35,
+        "lag_p95_ms": 3.21,
         "lane_dev_stop_cm": null,
         "brake_latency_ms": null
       }
@@ -92,7 +92,7 @@
       "metrics": {
         "f1": null,
         "blink_false_alarms": 0,
-        "lag_p95_ms": 5.27,
+        "lag_p95_ms": 3.39,
         "lane_dev_stop_cm": null,
         "brake_latency_ms": null
       }
@@ -142,7 +142,7 @@
       "metrics": {
         "f1": null,
         "blink_false_alarms": 0,
-        "lag_p95_ms": 4.57,
+        "lag_p95_ms": 3.34,
         "lane_dev_stop_cm": null,
         "brake_latency_ms": null
       }
@@ -194,7 +194,7 @@
       "metrics": {
         "f1": 1.0,
         "blink_false_alarms": 0,
-        "lag_p95_ms": 4.39,
+        "lag_p95_ms": 3.47,
         "lane_dev_stop_cm": null,
         "brake_latency_ms": null
       }
@@ -250,7 +250,7 @@
       "metrics": {
         "f1": 1.0,
         "blink_false_alarms": 0,
-        "lag_p95_ms": 5.78,
+        "lag_p95_ms": 3.78,
         "lane_dev_stop_cm": null,
         "brake_latency_ms": null
       }
@@ -302,7 +302,7 @@
       "metrics": {
         "f1": 1.0,
         "blink_false_alarms": 0,
-        "lag_p95_ms": 5.34,
+        "lag_p95_ms": 3.27,
         "lane_dev_stop_cm": null,
         "brake_latency_ms": null
       }
@@ -355,7 +355,7 @@
       "metrics": {
         "f1": 1.0,
         "blink_false_alarms": 0,
-        "lag_p95_ms": 4.22,
+        "lag_p95_ms": 4.5,
         "lane_dev_stop_cm": null,
         "brake_latency_ms": null
       }
@@ -422,7 +422,7 @@
       "metrics": {
         "f1": 1.0,
         "blink_false_alarms": 0,
-        "lag_p95_ms": 4.95,
+        "lag_p95_ms": 4.43,
         "lane_dev_stop_cm": 1.15,
         "brake_latency_ms": null
       }
@@ -474,7 +474,7 @@
       "metrics": {
         "f1": null,
         "blink_false_alarms": 0,
-        "lag_p95_ms": 5.0,
+        "lag_p95_ms": 3.72,
         "lane_dev_stop_cm": null,
         "brake_latency_ms": null
       }
@@ -522,7 +522,7 @@
       "metrics": {
         "f1": null,
         "blink_false_alarms": 0,
-        "lag_p95_ms": 5.2,
+        "lag_p95_ms": 2.97,
         "lane_dev_stop_cm": null,
         "brake_latency_ms": null
       }
@@ -574,7 +574,7 @@
       "metrics": {
         "f1": null,
         "blink_false_alarms": 0,
-        "lag_p95_ms": 4.67,
+        "lag_p95_ms": 3.6,
         "lane_dev_stop_cm": 0.88,
         "brake_latency_ms": null
       }
@@ -620,7 +620,7 @@
       "metrics": {
         "f1": null,
         "blink_false_alarms": 0,
-        "lag_p95_ms": 5.02,
+        "lag_p95_ms": 3.26,
         "lane_dev_stop_cm": null,
         "brake_latency_ms": null
       }
@@ -662,7 +662,7 @@
       "metrics": {
         "f1": null,
         "blink_false_alarms": 0,
-        "lag_p95_ms": 5.14,
+        "lag_p95_ms": 3.83,
         "lane_dev_stop_cm": null,
         "brake_latency_ms": null
       }
@@ -700,7 +700,7 @@
           "ok": true
         },
         {
-          "check": "brake_latency_ms <= 200.0 (got 38.0)",
+          "check": "brake_latency_ms <= 200.0 (got 36.9)",
           "ok": true
         }
       ],
@@ -710,9 +710,9 @@
       "metrics": {
         "f1": null,
         "blink_false_alarms": 0,
-        "lag_p95_ms": 5.61,
+        "lag_p95_ms": 4.15,
         "lane_dev_stop_cm": null,
-        "brake_latency_ms": 38.0
+        "brake_latency_ms": 36.9
       }
     },
     {
@@ -744,7 +744,7 @@
           "ok": true
         },
         {
-          "check": "brake_latency_ms <= 200.0 (got 178.2)",
+          "check": "brake_latency_ms <= 200.0 (got 177.5)",
           "ok": true
         }
       ],
@@ -754,9 +754,9 @@
       "metrics": {
         "f1": null,
         "blink_false_alarms": 0,
-        "lag_p95_ms": 4.62,
+        "lag_p95_ms": 3.57,
         "lane_dev_stop_cm": null,
-        "brake_latency_ms": 178.2
+        "brake_latency_ms": 177.5
       }
     },
     {
@@ -787,7 +787,7 @@
           "ok": true
         },
         {
-          "check": "brake_latency_ms <= 200.0 (got 3.0)",
+          "check": "brake_latency_ms <= 200.0 (got 2.3)",
           "ok": true
         }
       ],
@@ -797,9 +797,9 @@
       "metrics": {
         "f1": null,
         "blink_false_alarms": 0,
-        "lag_p95_ms": 4.43,
+        "lag_p95_ms": 3.66,
         "lane_dev_stop_cm": null,
-        "brake_latency_ms": 3.0
+        "brake_latency_ms": 2.3
       }
     }
   ],
@@ -815,7 +815,7 @@
       "pass": true
     },
     "lag_p95_ms": {
-      "value": 5.78,
+      "value": 4.5,
       "target": "<= 100.0",
       "pass": true
     },
@@ -825,7 +825,7 @@
       "pass": true
     },
     "brake_latency_ms": {
-      "value": 178.2,
+      "value": 177.5,
       "target": "<= 200.0",
       "pass": true
     },
