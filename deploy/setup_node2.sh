@@ -15,10 +15,10 @@ python3 -m venv --system-site-packages "$REPO/.venv"     # system site-packages 
 "$REPO/.venv/bin/pip" install --upgrade pip
 "$REPO/.venv/bin/pip" install -r "$REPO/requirements-node2.txt"
 sudo usermod -aG i2c,video,dialout "$USER" || true
-for unit in adown-node2 adown-dashboard; do
+for unit in turtlebot3-bringup adown-node2 adown-dashboard; do
   sed "s#__REPO__#$REPO#g; s#__USER__#$USER#g" "$REPO/deploy/systemd/$unit.service" | sudo tee /etc/systemd/system/$unit.service >/dev/null
 done
 sudo systemctl daemon-reload
-sudo systemctl enable adown-node2.service adown-dashboard.service
+sudo systemctl enable turtlebot3-bringup.service adown-node2.service adown-dashboard.service
 echo "Done. Check:  source /opt/ros/humble/setup.bash && $REPO/.venv/bin/python -m adowndriver check --role node2"
 echo "Dashboard:    http://$(hostname -I | awk '{print $1}'):8000"

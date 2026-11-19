@@ -9,14 +9,16 @@
 </head>
 <body>
 <header class="topbar">
-  <div class="brand"><span class="logo">A</span><div><b>AdownDriver</b><small>Operator console · Team #Matigoat</small></div></div>
+  <div class="brand"><span class="logo">A</span><div><b>AdownDriver</b><small>Drowsiness-aware safe stop</small></div></div>
   <nav class="tabs" id="tabs">
-    <button data-tab="tasks" class="active">Tasks</button>
-    <button data-tab="live">Live</button>
-    <button data-tab="trials">Trials</button>
-    <button data-tab="validation">Validation</button>
-    <button data-tab="settings">Settings</button>
-    <button data-tab="help">Help</button>
+    <button data-tab="drive" class="active">Drive</button>
+    <span class="tab-sep" aria-hidden="true"></span>
+    <button data-tab="live" class="eng">Details</button>
+    <button data-tab="trials" class="eng">Trials</button>
+    <button data-tab="validation" class="eng">Validation</button>
+    <button data-tab="settings" class="eng">Settings</button>
+    <button data-tab="tasks" class="eng">Tasks</button>
+    <button data-tab="help" class="eng">Help</button>
   </nav>
   <div class="pills">
     <span class="pill" id="pill-n1" title="Node 1 - cockpit DMS station">Node 1</span>
@@ -29,8 +31,85 @@
 </header>
 
 <main>
+<!-- ============================ DRIVE (simple operator view) ============================ -->
+<section id="tab-drive" class="tab active">
+  <div class="dv">
+    <section class="dv-road" id="dvRoad" aria-live="polite">
+      <ol class="dv-stages" id="dvStages">
+        <li data-st="STANDBY">Ready</li>
+        <li data-st="NORMAL_CRUISE">Driving</li>
+        <li data-st="WARNING">Warning</li>
+        <li data-st="SPEED_REDUCTION">Slowing</li>
+        <li data-st="CONTROLLED_STOP">Stopping</li>
+        <li data-st="EMERGENCY_STOP">Emergency</li>
+      </ol>
+      <h1 class="dv-title" id="dvTitle">Connecting…</h1>
+      <p class="dv-sub" id="dvSub">Waiting for the robot.</p>
+    </section>
+
+    <div class="dv-main">
+      <div class="dv-cams">
+        <figure class="dv-cam"><img id="dvVid1" alt="Driver camera"><div class="dv-nosig" id="dvNs1">Cockpit camera offline</div>
+          <figcaption>Driver</figcaption></figure>
+        <figure class="dv-cam"><img id="dvVid2" alt="Road camera"><div class="dv-nosig" id="dvNs2">Robot camera offline</div>
+          <figcaption>Road</figcaption></figure>
+      </div>
+
+      <aside class="dv-side">
+        <div class="dv-gauge" id="dvEyes">
+          <div class="dv-g-head"><span class="dv-g-name">Driver's eyes</span><b id="dvEyesVal">—</b></div>
+          <div class="dv-track"><div id="dvEyesFill"></div><i id="dvMkW"></i><i id="dvMkS"></i></div>
+          <p class="dv-g-note" id="dvEyesNote">Closed for 0.0 s · stop at 4.0 s</p>
+        </div>
+        <div class="dv-gauge" id="dvObs">
+          <div class="dv-g-head"><span class="dv-g-name">Lidar: free space ahead</span><b id="dvObsVal">—</b></div>
+          <div class="dv-track zones"><div id="dvObsFill"></div></div>
+          <p class="dv-g-note">Slows under 45 cm, stops under 20 cm</p>
+        </div>
+        <div class="dv-gauge" id="dvSpd">
+          <div class="dv-g-head"><span class="dv-g-name">Speed</span><b id="dvSpdVal">—</b></div>
+          <div class="dv-track"><div id="dvSpdFill"></div></div>
+          <p class="dv-g-note" id="dvLink">Link —</p>
+        </div>
+
+        <div class="dv-check" id="dvCheck">
+          <p class="dv-check-h">Before you start</p>
+          <ul>
+            <li id="ckN1">Cockpit connected</li>
+            <li id="ckN2">Robot connected</li>
+            <li id="ckFace">Driver's face visible</li>
+            <li id="ckCal">Driver calibrated</li>
+            <li id="ckPath">Path ahead clear</li>
+          </ul>
+        </div>
+      </aside>
+    </div>
+
+    <div class="dv-actions">
+      <div class="dv-flow">
+        <button class="dv-btn" id="dvCalib"><span class="dv-n">1</span><span><b>Calibrate driver</b><small id="dvCalibMsg">Look at the camera with eyes open for 5 s</small></span></button>
+        <button class="dv-btn go" id="dvStart"><span class="dv-n">2</span><span><b>Start driving</b><small>Robot drives at 0.16 m/s</small></span></button>
+        <button class="dv-btn" id="dvStop"><b>Stop</b><small>Gentle stop</small></button>
+        <button class="dv-btn" id="dvReset"><b>Reset</b><small>Clear a stop</small></button>
+      </div>
+      <button class="dv-estop" id="dvEstop"><b>Emergency stop</b><small>or press Space</small></button>
+    </div>
+    <div class="dv-vol">
+      <label for="dvVol">Cockpit sound</label>
+      <input type="range" id="dvVol" min="0" max="100" step="5" value="60" aria-label="Cockpit speaker volume">
+      <b id="dvVolVal">60%</b>
+    </div>
+    <div class="dv-calbar" id="dvCalBar" hidden><div></div></div>
+
+    <section class="dv-log">
+      <p class="dv-log-h">What just happened</p>
+      <ol id="dvLog"><li class="dv-empty">Nothing yet. Calibrate the driver, then start driving.</li></ol>
+    </section>
+  </div>
+</section>
+
 <!-- ============================ TASKS (launcher) ============================ -->
-<section id="tab-tasks" class="tab active">
+<section id="tab-tasks" class="tab">
   <div class="launch-hero card">
     <div class="hero-top">
       <div>
@@ -42,7 +121,7 @@
       </div>
       <div class="machine small" id="machine"></div>
     </div>
-    <input id="taskSearch" class="search" placeholder="Search: e.g. “lane”, “S08”, “Dilshod”, “calibrate”, “T3.2” …" autocomplete="off">
+    <input id="taskSearch" class="search" placeholder="Search: e.g. “lane”, “S08”, “calibrate”, “T3.2” …" autocomplete="off">
     <ol class="flow" id="flow"></ol>
   </div>
   <div class="launch-grid">
@@ -128,7 +207,7 @@
         <div class="tile" id="tMar"><span>MAR</span><b>—</b><div class="meter"><div></div><i></i></div><small>yawn &gt; 0.60</small></div>
         <div class="tile" id="tCd"><span>C<sub>driver</sub></span><b>—</b><div class="meter"><div></div><i style="left:65%"></i></div><small>face · pose · light</small></div>
         <div class="tile" id="tCl"><span>C<sub>lane</sub></span><b>—</b><div class="meter"><div></div><i style="left:65%"></i></div><small id="laneWidth">lane —</small></div>
-        <div class="tile" id="tD"><span>Obstacle d</span><b>—</b><div class="meter zones"><div></div></div><small>stop &lt; 20 · slow &lt; 45 cm</small></div>
+        <div class="tile" id="tD"><span>Lidar distance</span><b>—</b><div class="meter zones"><div></div></div><small>stop &lt; 20 · slow &lt; 45 cm</small></div>
         <div class="tile" id="tE"><span>Lateral e<sub>y</sub></span><b>—</b><div class="meter center"><div></div></div><small>±5 cm target</small></div>
         <div class="tile" id="tLag"><span>Lag p.frame</span><b>—</b><small id="lagDetail">N1 — · N2 —</small></div>
         <div class="tile" id="tLink"><span>Heartbeat</span><b>—</b><small id="linkDetail">RTT —</small></div>
@@ -206,7 +285,7 @@
     <div class="label row">Software-in-the-loop validation · 16 scenarios
       <button class="btn go small-btn" id="btnValidate">Run all scenarios</button></div>
     <p class="small muted">Runs the real lane detector, safety FSM and steering controller against the simulated track,
-      ToF sensor, Wi-Fi link and a scripted driver. Use it after every parameter change, before going to the arena.</p>
+      lidar, Wi-Fi link and a scripted driver. Use it after every parameter change, before going to the arena.</p>
     <div id="valStatus" class="small"></div>
     <div class="metric-cards" id="valMetrics"></div>
     <div class="table-wrap"><table class="runs"><thead><tr><th>ID</th><th>Scenario</th><th>State sequence</th>
@@ -244,7 +323,7 @@
         <dt class="s-WARNING">WARNING</dt><dd>Eyes closed ≥ 1.2 s, a yawn, high PERCLOS or looking away ≥ 2 s. Intermittent beep.</dd>
         <dt class="s-SPEED_REDUCTION">SPEED REDUCTION</dt><dd>Closure ≥ 2.5 s, 3 yawns/min or the face is not visible ≥ 0.5 s. 50 % speed.</dd>
         <dt class="s-CONTROLLED_STOP">CONTROLLED STOP</dt><dd>Closure ≥ 4 s or driver missing ≥ 5 s. Ramps to 0 at 0.06 m/s² while staying in lane. Latched.</dd>
-        <dt class="s-EMERGENCY_STOP">EMERGENCY STOP</dt><dd>Obstacle &lt; 20 cm, heartbeat lost &gt; 150 ms, lane lost &gt; 0.3 s, ToF fault or E-STOP. Immediate stop.</dd>
+        <dt class="s-EMERGENCY_STOP">EMERGENCY STOP</dt><dd>Obstacle &lt; 20 cm, heartbeat lost &gt; 150 ms, lane lost &gt; 0.3 s, lidar fault or E-STOP. Immediate stop.</dd>
       </dl>
     </div>
   </div>
@@ -254,5 +333,6 @@
 <div id="toast"></div>
 <script src="/static/app.js"></script>
 <script src="/static/tasks.js"></script>
+<script src="/static/drive.js"></script>
 </body>
 </html>

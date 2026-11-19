@@ -1,6 +1,6 @@
 # AdownDriver - SIL validation report
 
-Generated 2026-11-13 20:45:18 - **16/16 scenarios passed**
+Generated 2026-11-13 21:32:58 - **16/16 scenarios passed**
 
 ## Acceptance metrics
 
@@ -8,7 +8,7 @@ Generated 2026-11-13 20:45:18 - **16/16 scenarios passed**
 |---|---|---|---|
 | f1 | 1.0 | >= 0.9 | PASS |
 | blink_false_alarms | 0 | == 0 | PASS |
-| lag_p95_ms | 4.5 | <= 100.0 | PASS |
+| lag_p95_ms | 4.53 | <= 100.0 | PASS |
 | lane_dev_stop_cm | 1.15 | <= 5.0 | PASS |
 | brake_latency_ms | 177.5 | <= 200.0 | PASS |
 

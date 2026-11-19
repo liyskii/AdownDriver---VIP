@@ -173,11 +173,18 @@ class VehicleConfig:
     cmd_vel_topic: str = "/cmd_vel"
     cmd_vel_stamped: bool = False         # True for ROS 2 Jazzy TurtleBot3 images
     motor_watchdog_s: float = 0.25        # stale command -> publish zero
-    tof_driver: str = "auto"              # auto | vl53l1x | sim | none
+    lane_keeping: bool = True             # False = demo without a taped track: drive straight, no LANE_LOST
+    tof_driver: str = "auto"              # auto | vl53l1x | lidar | sim | none  (auto: VL53L1X, else TurtleBot LDS /scan)
     tof_i2c_bus: int = 1
     tof_address: int = 0x29
     tof_mode: int = 1                     # 1 short (<=1.3 m, best in ambient light), 2 medium, 3 long
     tof_mount_offset_cm: float = 0.0      # sensor-to-bumper offset
+    # TurtleBot3 LDS (LDS-01/02/03) used as the forward obstacle sensor instead of the VL53L1X
+    lidar_topic: str = "/scan"
+    lidar_sector_deg: float = 20.0        # +/- half-angle of the forward cone
+    lidar_front_offset_cm: float = 7.0    # lidar centre -> front edge of the robot (Burger ~7 cm)
+    lidar_max_cm: float = 300.0           # nothing closer in the cone = clear path at this distance
+    lidar_stale_s: float = 1.0            # no scan for this long -> invalid (FSM raises TOF_FAULT)
 
 
 @dataclass
@@ -199,6 +206,14 @@ class HardwareConfig:
     oled_i2c_bus: int = 1
     oled_address: int = 0x3C
     buzzer_enabled: bool = True
+    # Buzzer patterns through a speaker on the 3.5 mm jack / USB audio (aplay). auto = Node 1 only.
+    audio_buzzer: str = "auto"            # auto | yes | no
+    audio_device: str = "auto"            # auto (Pi headphone jack if present) | ALSA name, e.g. plughw:1,0
+    audio_volume: float = 0.6             # 0..1
+    # Custom alert sounds: WAV files in this folder replace the tones (missing file -> tone):
+    #   warning.wav (WARNING), slowing.wav (SPEED_REDUCTION), stop.wav (CONTROLLED/EMERGENCY STOP), ack.wav (button chirp)
+    audio_dir: str = "sounds"
+    audio_gap_s: float = 0.4              # silence between repeats of a looping alert sound
 
 
 @dataclass
@@ -301,9 +316,10 @@ def _merge(dc: Any, data: dict) -> None:
 
 
 def load_config(path: str | os.PathLike | None = None) -> AppConfig:
-    """Load defaults, then ``config/default.yaml`` (if present), then *path*."""
+    """Load defaults, then ``config/default.yaml``, then ``config/local.yaml`` (per-machine, git-ignored),
+    then ``$ADOWN_CONFIG``, then *path*."""
     cfg = AppConfig()
-    candidates = [REPO_ROOT / "config" / "default.yaml"]
+    candidates = [REPO_ROOT / "config" / "default.yaml", REPO_ROOT / "config" / "local.yaml"]
     env = os.environ.get("ADOWN_CONFIG")
     if env:
         candidates.append(Path(env))

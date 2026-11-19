@@ -30,7 +30,7 @@ from ..common.filters import FpsMeter, RateTimer
 from ..config import PARAM_LIMITS, RUNTIME_TUNABLE, AppConfig, resolve_path
 from ..hardware.peripherals import Buttons, StatusIndicators
 from .core import StepInput, VehicleCore
-from .io import FrameGrabber, NoTof, TofSensor, make_motor
+from .io import FrameGrabber, make_motor, make_range_sensor
 
 
 def cpu_temp_c() -> Optional[float]:
@@ -68,7 +68,9 @@ class VehicleNode:
             self.cam = None
             self.tof = None
         else:
-            self.cam = FrameGrabber(cfg.vehicle.camera_source, cfg.camera.width, cfg.camera.height)
+            # with lane keeping off the road camera is only a preview -> the robot must still run without it
+            self.cam = FrameGrabber(cfg.vehicle.camera_source, cfg.camera.width, cfg.camera.height,
+                                    optional=not cfg.vehicle.lane_keeping)
             self.tof = self._make_tof()
         self.motor = make_motor(cfg.vehicle, self.world)
         self.ind = StatusIndicators(cfg.hardware, "node2")
@@ -93,16 +95,7 @@ class VehicleNode:
         self.fps = FpsMeter()
 
     def _make_tof(self):
-        want = self.cfg.vehicle.tof_driver
-        if want == "none":
-            return NoTof()
-        try:
-            return TofSensor(self.cfg.vehicle)
-        except Exception as exc:
-            if want == "vl53l1x":
-                raise
-            print(f"[node2] VL53L1X not available ({exc.__class__.__name__}); obstacle detection DISABLED")
-            return NoTof()
+        return make_range_sensor(self.cfg.vehicle)
 
     # ------------------------------------------------------------------ #
     def _on_driver(self, data: bytes, addr) -> None:
@@ -254,6 +247,9 @@ class VehicleNode:
                     "uptime_s": round(loop_start - self.t_start, 1), "cpu_temp": cpu_temp_c(),
                     "motor": self.motor.name, "watchdog_trips": self.motor.watchdog_trips,
                     "camera": "sim" if self.sim else self.cam.backend,
+                    "range_sensor": ({"src": "sim"} if self.sim else
+                                     self.tof.stats() if hasattr(self.tof, "stats") else
+                                     {"src": type(self.tof).__name__}),
                     "run_id": self.recorder.run_id, "run": self.recorder.run_meta if self.recorder.run_id else None,
                     "events": list(self.recent_events)[-12:], "ack": self.last_ack,
                     "pose": None if not self.sim else {"x": round(self.world.robot.x, 3),

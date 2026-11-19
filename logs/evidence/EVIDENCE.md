@@ -1,6 +1,6 @@
 # AdownDriver - evidence pack
 
-Generated 2026-11-13 20:45:56 by `tools/evidence_pack.py` (Team #Matigoat).
+Generated 2026-11-13 21:33:38 by `tools/evidence_pack.py` (Team #Matigoat).
 
 ## 1. Environment
 
@@ -16,7 +16,7 @@ Generated 2026-11-13 20:45:56 by `tools/evidence_pack.py` (Team #Matigoat).
 | rclpy | not installed on this machine |
 | git commit | n/a (exported copy) |
 
-## 2. Unit tests - 59/59 passed (25.2 s)
+## 2. Unit tests - 60/60 passed (33.2 s)
 
 | Test file | Tests | Failed |
 |---|---|---|
@@ -26,7 +26,7 @@ Generated 2026-11-13 20:45:56 by `tools/evidence_pack.py` (Team #Matigoat).
 | test_lane.py | 10 | 0 |
 | test_launcher.py | 6 | 0 |
 | test_protocol_audit.py | 4 | 0 |
-| test_sil.py | 4 | 0 |
+| test_sil.py | 5 | 0 |
 
 ## 3. Software-in-the-loop validation - 16/16 scenarios passed
 
@@ -34,7 +34,7 @@ Generated 2026-11-13 20:45:56 by `tools/evidence_pack.py` (Team #Matigoat).
 |---|---|---|---|
 | f1 | 1.0 | >= 0.9 | PASS |
 | blink_false_alarms | 0 | == 0 | PASS |
-| lag_p95_ms | 4.5 | <= 100.0 | PASS |
+| lag_p95_ms | 4.53 | <= 100.0 | PASS |
 | lane_dev_stop_cm | 1.15 | <= 5.0 | PASS |
 | brake_latency_ms | 177.5 | <= 200.0 | PASS |
 
@@ -81,11 +81,11 @@ Generated 2026-11-13 20:45:56 by `tools/evidence_pack.py` (Team #Matigoat).
 | `adowndriver/hardware/peripherals.py` | `cecaedca64cd45c4` |
 | `adowndriver/hardware/selftest.py` | `fd141a8a6c5a66cf` |
 | `adowndriver/launcher/__init__.py` | `2ff9c6786c4066bd` |
-| `adowndriver/launcher/catalog.py` | `2d3e0586352a82c9` |
+| `adowndriver/launcher/catalog.py` | `397973fc37e94f75` |
 | `adowndriver/launcher/jobs.py` | `0c77b98df6736040` |
 | `adowndriver/launcher/menu.py` | `14afc8fef39495f5` |
 | `adowndriver/sim/__init__.py` | `01ba4719c80b6fe9` |
-| `adowndriver/sim/runner.py` | `5ddb0c3814f1ea23` |
+| `adowndriver/sim/runner.py` | `9805b2292e81ffb6` |
 | `adowndriver/sim/scenarios.py` | `41fd19c88afcffe7` |
 | `adowndriver/sim/synthetic_driver.py` | `a654e2f976d27677` |
 | `adowndriver/sim/world.py` | `8ce6f53b719cc512` |
@@ -102,4 +102,4 @@ Generated 2026-11-13 20:45:56 by `tools/evidence_pack.py` (Team #Matigoat).
 
 Arena trials on the real TurtleBot, the lane homography calibration and the Node 1 frame rate on the Raspberry Pi are measured on hardware with the Trials tab (`logs/runs/`) and are reported separately.
 
-_Built in 27 s._
+_Built in 34 s._

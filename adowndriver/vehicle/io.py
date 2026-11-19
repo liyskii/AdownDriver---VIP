@@ -22,7 +22,8 @@ from ..config import VehicleConfig
 class FrameGrabber:
     """Background grabber; ``read()`` returns (frame, t_mono, seq)."""
 
-    def __init__(self, source: str, width: int = 320, height: int = 240, fps: int = 30):
+    def __init__(self, source: str, width: int = 320, height: int = 240, fps: int = 30,
+                 optional: bool = False):
         self.source, self.w, self.h, self.fps = source, width, height, fps
         self.frame: Optional[np.ndarray] = None
         self.t = 0.0
@@ -30,7 +31,15 @@ class FrameGrabber:
         self.backend = "none"
         self._lock = threading.Lock()
         self._running = True
-        self._open()
+        self.optional = optional
+        try:
+            self._open()
+        except RuntimeError as exc:
+            if not optional:
+                raise
+            print(f"[node2] road camera not found - running WITHOUT it, will keep looking ({exc})", flush=True)
+            self.picam = self.cap = None
+            self.backend = "none"
         self._thread = threading.Thread(target=self._loop, daemon=True)
         self._thread.start()
 
@@ -39,6 +48,8 @@ class FrameGrabber:
         self.picam = self.cap = None
         tried = []
         order = [src] if src != "auto" else ["picamera2", "v4l2:0", "gstreamer"]
+        if src.startswith("v4l2"):                        # a USB camera may come up as video0..video3
+            order += [f"v4l2:{i}" for i in range(4) if f"v4l2:{i}" != src]
         for s in order:
             try:
                 if s == "picamera2":
@@ -80,6 +91,14 @@ class FrameGrabber:
     def _loop(self) -> None:
         period = 1.0 / self.fps
         while self._running:
+            if self.picam is None and self.cap is None:      # optional camera missing: retry every 3 s
+                time.sleep(3.0)
+                try:
+                    self._open()
+                    print(f"[node2] road camera connected ({self.backend})", flush=True)
+                except Exception:
+                    pass
+                continue
             if self.picam is not None:
                 frame = self.picam.capture_array()
             else:
@@ -167,6 +186,158 @@ class TofSensor:
             self.dev.stop_ranging()
         except Exception:
             pass
+
+
+def front_distance_cm(ranges, angle_min: float, angle_increment: float, sector_deg: float,
+                      front_offset_cm: float, max_cm: float, range_min: float = 0.05) -> float:
+    """Closest obstacle (cm, from the robot's front edge) inside +/-sector_deg of straight ahead.
+
+    0 / inf / NaN / below range_min are "no return" and ignored. The 3rd-smallest valid beam is
+    used instead of the minimum so one noisy beam cannot trigger an EMERGENCY_STOP. If the cone
+    has no valid return the path is clear -> ``max_cm``.
+    """
+    r = np.asarray(ranges, dtype=np.float32)
+    if r.size == 0:
+        return max_cm
+    ang = angle_min + angle_increment * np.arange(r.size, dtype=np.float32)
+    ang = (ang + np.pi) % (2 * np.pi) - np.pi                     # wrap to [-pi, pi)
+    cone = np.abs(ang) <= np.deg2rad(sector_deg)
+    vals = r[cone]
+    vals = vals[np.isfinite(vals) & (vals >= range_min)]
+    if vals.size == 0:
+        return max_cm
+    k = min(2, vals.size - 1)
+    d = float(np.partition(vals, k)[k]) * 100.0 - front_offset_cm
+    return float(min(max(d, 0.0), max_cm))
+
+
+class LidarRange:
+    """TurtleBot3 LDS on ``/scan`` used as the forward range sensor (drop-in for TofSensor).
+
+    ``read()`` -> (distance_cm or None, t_mono); None when no scan arrived for ``lidar_stale_s``
+    (lidar unplugged / bringup not running) so the FSM raises TOF_FAULT exactly as for the VL53L1X.
+    Runs its own rclpy context + node + executor thread; needs ``turtlebot3_bringup`` to be running.
+    If no scan arrives for ``RESUBSCRIBE_S`` the node is rebuilt (recovers after a bringup restart
+    or a lost DDS discovery), and ``stats()`` reports what is happening for the dashboard.
+    """
+
+    RESUBSCRIBE_S = 3.0
+
+    def __init__(self, cfg: VehicleConfig):
+        import rclpy
+        from rclpy.context import Context
+        from rclpy.executors import SingleThreadedExecutor
+        from rclpy.qos import qos_profile_sensor_data
+        from sensor_msgs.msg import LaserScan
+        self.cfg = cfg
+        self.rclpy = rclpy
+        self._Exec, self._qos, self._Msg = SingleThreadedExecutor, qos_profile_sensor_data, LaserScan
+        try:                                              # own DDS participant, isolated from the motor node
+            self.ctx = Context()
+            rclpy.init(context=self.ctx)
+        except Exception:                                 # fall back to the shared default context
+            self.ctx = None
+            if not rclpy.ok():
+                rclpy.init()
+        self.value: Optional[float] = None
+        self.t_scan = 0.0
+        self.scans = 0
+        self.rebuilds = 0
+        self.last_error = ""
+        self.enabled = True
+        self._running = True
+        self.node = None
+        self.exec = None
+        self._build()
+        self.t_built = time.monotonic()
+        threading.Thread(target=self._spin, daemon=True).start()
+
+    def _build(self) -> None:
+        kw = {} if self.ctx is None else {"context": self.ctx}
+        self.node = self.rclpy.create_node("adown_lidar_range", **kw)
+        self.node.create_subscription(self._Msg, self.cfg.lidar_topic, self._on_scan, self._qos)
+        self.exec = self._Exec(**kw)
+        self.exec.add_node(self.node)
+
+    def _rebuild(self) -> None:
+        try:
+            self.exec.shutdown(timeout_sec=0.2)
+            self.node.destroy_node()
+        except Exception as exc:
+            self.last_error = f"{exc.__class__.__name__}: {exc}"[:120]
+        self._build()
+        self.rebuilds += 1
+        self.t_built = time.monotonic()
+        print(f"[node2] lidar: no {self.cfg.lidar_topic} for {self.RESUBSCRIBE_S:.0f} s - resubscribed "
+              f"(#{self.rebuilds}, scans so far {self.scans})", flush=True)
+
+    def _on_scan(self, msg) -> None:
+        try:
+            self.value = front_distance_cm(msg.ranges, msg.angle_min, msg.angle_increment,
+                                           self.cfg.lidar_sector_deg, self.cfg.lidar_front_offset_cm,
+                                           self.cfg.lidar_max_cm, max(0.05, msg.range_min))
+            self.t_scan = time.monotonic()
+            self.scans += 1
+        except Exception as exc:
+            self.last_error = f"{exc.__class__.__name__}: {exc}"[:120]
+
+    def _spin(self) -> None:
+        while self._running:
+            try:
+                self.exec.spin_once(timeout_sec=0.1)
+            except Exception as exc:
+                self.last_error = f"{exc.__class__.__name__}: {exc}"[:120]
+                time.sleep(0.05)
+            now = time.monotonic()
+            if now - max(self.t_scan, self.t_built) > self.RESUBSCRIBE_S:
+                try:
+                    self._rebuild()
+                except Exception as exc:
+                    self.last_error = f"{exc.__class__.__name__}: {exc}"[:120]
+                    self.t_built = now
+
+    def read(self):
+        now = time.monotonic()
+        if self.t_scan == 0.0 or now - self.t_scan > self.cfg.lidar_stale_s:
+            return None, now
+        return self.value, self.t_scan
+
+    def stats(self) -> dict:
+        age = None if self.t_scan == 0.0 else round((time.monotonic() - self.t_scan) * 1000)
+        return {"src": "lidar", "topic": self.cfg.lidar_topic, "scans": self.scans, "age_ms": age,
+                "rebuilds": self.rebuilds, "error": self.last_error}
+
+    def close(self) -> None:
+        self._running = False
+        time.sleep(0.15)                                  # let the spin thread leave spin_once
+        try:
+            self.exec.shutdown(timeout_sec=0.5)
+            self.node.destroy_node()
+            if self.ctx is not None:
+                self.rclpy.shutdown(context=self.ctx)
+        except Exception:
+            pass
+
+
+def make_range_sensor(cfg: VehicleConfig):
+    """VL53L1X if present, otherwise the TurtleBot LDS (``tof_driver``: auto | vl53l1x | lidar | none)."""
+    want = cfg.tof_driver
+    if want == "none":
+        return NoTof()
+    if want in ("auto", "vl53l1x"):
+        try:
+            return TofSensor(cfg)
+        except Exception as exc:
+            if want == "vl53l1x":
+                raise
+            print(f"[node2] VL53L1X not available ({exc.__class__.__name__}); trying the LDS lidar on {cfg.lidar_topic}")
+    try:
+        return LidarRange(cfg)
+    except Exception as exc:
+        if want == "lidar":
+            raise
+        print(f"[node2] lidar not available ({exc.__class__.__name__}: {exc}); obstacle detection DISABLED")
+        return NoTof()
 
 
 class NoTof:

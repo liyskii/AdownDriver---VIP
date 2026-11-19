@@ -5,7 +5,7 @@ const STATE_COLOR = {STANDBY:"#3b82f6",NORMAL_CRUISE:"#22c55e",WARNING:"#eab308"
   CONTROLLED_STOP:"#ef4444",EMERGENCY_STOP:"#dc2626",OFFLINE:"#64748b"};
 const READY_TEXT = {NO_DRIVER_LINK:"No packets from Node 1 (cockpit)", DRIVER_NOT_VISIBLE:"Driver face not visible / low C_driver",
   LANE_NOT_VISIBLE:"Lane tape not visible to the road camera", PATH_BLOCKED:"Obstacle in front of the robot",
-  TOF_INVALID:"ToF sensor reading invalid", ACTIVE_FAULTS:"Faults active - press RESET",
+  TOF_INVALID:"Lidar sends no data", ACTIVE_FAULTS:"Faults active - press RESET",
   DRIVER_STOP_LATCHED:"Controlled stop latched - driver must be alert, then RESET"};
 const SERIES = [
   {k:"ear", label:"EAR", color:"#38bdf8", min:0, max:0.45, on:true},
@@ -40,6 +40,7 @@ document.querySelectorAll("#tabs button").forEach(b => b.onclick = () => {
   if(b.dataset.tab==="trials") loadRuns();
   if(b.dataset.tab==="validation") loadValidation();
   if(b.dataset.tab==="settings") loadParams();
+  if(window.onTabChange) window.onTabChange(b.dataset.tab);
 });
 
 // ---------------------------------------------------------------- controls
@@ -76,10 +77,10 @@ function connect(){
   const ws = new WebSocket(`${location.protocol==="https:"?"wss":"ws"}://${location.host}/ws`);
   ws.onopen = () => { $("pill-ws").className="pill ok"; };
   ws.onclose = () => { $("pill-ws").className="pill bad"; setTimeout(connect, 1000); };
-  ws.onmessage = (ev) => { snap = JSON.parse(ev.data); render(snap); };
+  ws.onmessage = (ev) => { snap = JSON.parse(ev.data); try { if(window.renderDrive) window.renderDrive(snap); } catch(e){ console.error(e); } render(snap); };
 }
 connect();
-$("vid1").src = "/video/1.mjpg"; $("vid2").src = "/video/2.mjpg";
+// video streams are attached only for the visible tab (drive.js) to save Pi bandwidth
 api("/api/history").then(h => { hist = h.map(r => ({...r, c_drv:r.c_drv})).concat(hist); }).catch(()=>{});
 
 function pill(id, ok, text){ const p=$(id); p.className = "pill " + (ok===null?"":ok?"ok":"bad"); p.textContent=text; }

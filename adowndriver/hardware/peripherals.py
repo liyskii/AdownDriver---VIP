@@ -8,9 +8,13 @@ code runs everywhere. Wiring: docs/HARDWARE_WIRING.md
 """
 from __future__ import annotations
 
+import shutil
+import subprocess
 import threading
 import time
 from typing import Callable, Optional
+
+import numpy as np
 
 from ..config import HardwareConfig
 
@@ -31,6 +35,184 @@ BUZZER_PATTERNS = {
 
 def _want(flag: str) -> Optional[bool]:
     return {"yes": True, "no": False}.get(str(flag).lower())
+
+
+# custom WAV per buzzer pattern (config hardware.audio_dir); played in a loop while the pattern is active
+AUDIO_FILES = {"INTERMITTENT": "warning.wav", "FAST_PULSE": "slowing.wav", "CONTINUOUS": "stop.wav", "CHIRP": "ack.wav"}
+HELLO_FILE = "hello.wav"                        # played once when the cockpit starts
+
+
+def load_wav_mono(path, rate: int) -> Optional[np.ndarray]:
+    """Read a PCM WAV (8/16/24/32-bit, any rate, mono/stereo) -> int16 mono at *rate*. None if unreadable."""
+    import wave
+    try:
+        with wave.open(str(path), "rb") as w:
+            ch, sw, sr, n = w.getnchannels(), w.getsampwidth(), w.getframerate(), w.getnframes()
+            raw = w.readframes(n)
+    except Exception as exc:
+        print(f"[audio] cannot read {path}: {exc}")
+        return None
+    if sw == 1:
+        x = (np.frombuffer(raw, np.uint8).astype(np.float32) - 128) / 128
+    elif sw == 2:
+        x = np.frombuffer(raw, "<i2").astype(np.float32) / 32768
+    elif sw == 3:
+        b = np.frombuffer(raw, np.uint8).reshape(-1, 3)
+        x = ((b[:, 0].astype(np.int32) | (b[:, 1].astype(np.int32) << 8) | (b[:, 2].astype(np.int32) << 16)) << 8 >> 8) / 8388608.0
+        x = x.astype(np.float32)
+    else:
+        x = np.frombuffer(raw, "<i4").astype(np.float32) / 2147483648
+    x = x.reshape(-1, ch).mean(axis=1)
+    if sr != rate and x.size > 1:
+        t_new = np.arange(int(x.size * rate / sr)) * (sr / rate)
+        x = np.interp(t_new, np.arange(x.size), x).astype(np.float32)
+    return (np.clip(x, -1, 1) * 32767).astype(np.int16)
+
+
+# tone per buzzer pattern: the higher the urgency, the higher the pitch
+AUDIO_TONES_HZ = {"INTERMITTENT": 1400.0, "FAST_PULSE": 2000.0, "CONTINUOUS": 2600.0, "CHIRP": 3000.0}
+
+
+class AudioBuzzer:
+    """Plays the buzzer patterns on a speaker through ``aplay`` (raw PCM fed in 20 ms blocks).
+
+    The pattern clock stays in StatusIndicators; this class only renders "on/off + which tone".
+    A long-running aplay process keeps latency at ~60 ms. Any failure -> silently disabled.
+    """
+    RATE = 22050
+    BLOCK_S = 0.02
+
+    def __init__(self, cfg: HardwareConfig, role: str):
+        self.available = False
+        self.on = False
+        self.tone_hz = 2000.0
+        self.pattern = "OFF"
+        self.clips: dict = {}
+        self._clip_name = None
+        self._clip_pos = 0
+        self._oneshot = None
+        self._oneshot_pos = 0
+        want = _want(cfg.audio_buzzer)
+        if want is False or (want is None and role != "node1") or not shutil.which("aplay"):
+            return
+        device = cfg.audio_device
+        if device == "auto":
+            device = "default"
+            try:
+                cards = subprocess.run(["aplay", "-l"], capture_output=True, text=True, timeout=3).stdout
+                if "Headphones" in cards:
+                    device = "plughw:CARD=Headphones,DEV=0"
+            except Exception:
+                pass
+        try:
+            self.proc = subprocess.Popen(
+                ["aplay", "-q", "-D", device, "-t", "raw", "-f", "S16_LE", "-c", "1",
+                 "-r", str(self.RATE), "--buffer-time=60000"],
+                stdin=subprocess.PIPE, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        except Exception as exc:
+            print(f"[{role}] audio buzzer unavailable ({exc.__class__.__name__})")
+            return
+        self.device = device
+        self.volume = max(0.0, min(1.0, float(cfg.audio_volume)))
+        self._vol_file = None
+        try:                                              # volume set from the dashboard survives restarts
+            from ..config import resolve_path as _rp
+            self._vol_file = _rp("config") / "volume.txt"
+            if self._vol_file.is_file():
+                self.volume = max(0.0, min(1.0, float(self._vol_file.read_text().strip())))
+        except Exception:
+            pass
+        self.n = int(self.RATE * self.BLOCK_S)
+        self.silence = np.zeros(self.n, dtype=np.int16).tobytes()
+        self.phase = 0.0
+        from ..config import resolve_path
+        folder = resolve_path(cfg.audio_dir)
+        gap = np.zeros(int(self.RATE * max(0.0, cfg.audio_gap_s)), np.int16)
+        loaded: dict = {}                                  # identical files share one clip (see _block)
+        for pat, fname in AUDIO_FILES.items():
+            if (folder / fname).is_file():
+                key = (folder / fname).read_bytes()
+                if key not in loaded:
+                    c = load_wav_mono(folder / fname, self.RATE)
+                    loaded[key] = None if c is None or not c.size else (c if pat == "CHIRP" else np.concatenate([c, gap]))
+                if loaded[key] is not None:
+                    self.clips[pat] = loaded[key]
+        if (folder / HELLO_FILE).is_file():
+            hello = load_wav_mono(folder / HELLO_FILE, self.RATE)
+            if hello is not None and hello.size:
+                self._oneshot = hello
+        if self.clips:
+            print(f"[{role}] custom alert sounds: {', '.join(AUDIO_FILES[p] for p in self.clips)}")
+        self.available = True
+        self._running = True
+        threading.Thread(target=self._loop, daemon=True).start()
+        print(f"[{role}] audio buzzer on {device}")
+
+    def _block(self) -> bytes:
+        pat = self.pattern
+        if self._oneshot is not None and pat in ("OFF", "CHIRP"):   # greeting; any alert cuts it off
+            chunk = self._oneshot[self._oneshot_pos:self._oneshot_pos + self.n]
+            self._oneshot_pos += self.n
+            if self._oneshot_pos >= self._oneshot.size:
+                self._oneshot = None
+            if chunk.size < self.n:
+                chunk = np.concatenate([chunk, np.zeros(self.n - chunk.size, np.int16)])
+            return chunk.tobytes()
+        self._oneshot = None
+        if pat in self.clips and pat != "CHIRP":
+            clip = self.clips[pat]
+            if self._clip_name != pat:                    # new alert level -> start the sound from the beginning,
+                same = self._clip_name in self.clips and self.clips[self._clip_name] is clip
+                self._clip_name = pat                     # unless it is the same track (keep playing it)
+                if not same:
+                    self._clip_pos = 0
+            idx = (self._clip_pos + np.arange(self.n)) % clip.size
+            self._clip_pos = int((self._clip_pos + self.n) % clip.size)
+            return clip[idx].tobytes()
+        self._clip_name = None
+        if pat == "CHIRP" and "CHIRP" in self.clips:
+            return self.silence
+        if not self.on:
+            self.phase = 0.0
+            return self.silence
+        t = (np.arange(self.n) + self.phase) / self.RATE
+        self.phase += self.n
+        wave = np.sign(np.sin(2 * np.pi * self.tone_hz * t)) * 0.5 + 0.5 * np.sin(2 * np.pi * self.tone_hz * t)
+        return (wave * 12000).astype(np.int16).tobytes()
+
+    def set_volume(self, v: float) -> float:
+        self.volume = max(0.0, min(1.0, float(v)))
+        try:
+            if self._vol_file is not None:
+                self._vol_file.write_text(f"{self.volume:.2f}\n")
+        except Exception:
+            pass
+        return self.volume
+
+    def _scaled(self) -> bytes:
+        raw = self._block()
+        if self.volume >= 0.999 or raw is self.silence:
+            return raw
+        x = np.frombuffer(raw, np.int16).astype(np.float32) * self.volume
+        return x.astype(np.int16).tobytes()
+
+    def _loop(self) -> None:
+        while self._running:
+            try:
+                self.proc.stdin.write(self._scaled())      # blocks ~20 ms per block (paced by the sound card)
+                self.proc.stdin.flush()
+            except Exception:
+                self.available = False
+                return
+
+    def close(self) -> None:
+        self._running = False
+        self.on = False
+        try:
+            self.proc.stdin.close()
+            self.proc.terminate()
+        except Exception:
+            pass
 
 
 class StatusIndicators:
@@ -56,6 +238,9 @@ class StatusIndicators:
                 if want:
                     raise
                 print(f"[{role}] GPIO unavailable ({exc.__class__.__name__}); using mock indicators")
+        self.audio = AudioBuzzer(cfg, role)
+        if self.audio.available and self.backend == "mock":
+            self.backend = "audio"
         self._stop = False
         self._t = threading.Thread(target=self._run, daemon=True)
         self._t.start()
@@ -77,6 +262,10 @@ class StatusIndicators:
             pass
 
     def _apply_buzzer(self, on: bool) -> None:
+        if self.audio.available:
+            self.audio.tone_hz = AUDIO_TONES_HZ.get(self.buzz_name, 3000.0)
+            self.audio.pattern = "OFF" if self.muted else self.buzz_name
+            self.audio.on = on
         if self._buzzer is None:
             return
         try:
@@ -104,6 +293,7 @@ class StatusIndicators:
     def close(self) -> None:
         self._stop = True
         self._apply_buzzer(False)
+        self.audio.close()
         if self._led is not None:
             try:
                 self._led.off()

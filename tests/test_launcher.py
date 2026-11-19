@@ -63,7 +63,7 @@ def test_service_can_be_stopped_and_not_started_twice():
 
 
 def test_artifact_paths_are_sandboxed():
-    assert repo_file("logs/validation/REPORT.md").name == "REPORT.md"
+    assert repo_file("cad_models/CAD_SPECIFICATIONS.md").name == "CAD_SPECIFICATIONS.md"
     for bad in ("adowndriver/config.py", "../README.md", "logs/../config/default.yaml"):
         with pytest.raises(FileNotFoundError):
             repo_file(bad)
@@ -82,6 +82,9 @@ def test_api_endpoints():
         r = c.post("/api/tasks/run", json={"id": "T1.3", "params": {"driver": "anna"}}).json()
         assert r["status"] in ("ok", "failed") and r["sub_id"] == "T1.3"
         assert c.get(f"/api/jobs/{r['id']}").json()["log"]
+        r = c.post("/api/tasks/run", json={"id": "T9.2", "params": {"name": "quick_demo"}}).json()
+        assert r["values"] == {"name": "quick_demo"}
+        assert c.post("/api/tasks/run", json={"id": "T9.2", "params": {"name": "rm -rf"}}).status_code == 400
         assert c.get("/api/artifact", params={"path": "adowndriver/config.py"}).status_code == 404
         assert "Which task or sub-task" in c.get("/").text
-    assert set(INDEX) >= {"T1.1", "T5.1", "T8.3", "T9.1"}
+    assert set(INDEX) >= {"T1.1", "T5.1", "T8.3", "T8.4", "T9.1", "T9.2"}

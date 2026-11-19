@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import collections
 import json
+import dataclasses
 import math
 import time
 from dataclasses import dataclass, field
@@ -101,6 +102,10 @@ class VehicleCore:
             lane = self.lane.process(si.frame, want_debug=si.want_debug)
         else:
             lane = self.last_lane
+        if not self.cfg.vehicle.lane_keeping and si.lane_override is None:
+            # demo without a taped track: keep the camera preview, but steer straight and never raise LANE_LOST
+            lane = dataclasses.replace(lane, c_lane=1.0, e_y_m=0.0, e_axle_m=0.0, e_near_m=0.0,
+                                       heading_rad=0.0, curvature=0.0, mode="OFF")
         new_meas = lane is not self.last_lane
         self.last_lane = lane
         e_dr = self._odometry(si.dt, lane, new_meas)

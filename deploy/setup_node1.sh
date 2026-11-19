@@ -4,7 +4,7 @@
 set -euo pipefail
 REPO="$(cd "$(dirname "$0")/.." && pwd)"
 sudo apt-get update
-sudo apt-get install -y python3-venv python3-dev python3-lgpio i2c-tools v4l-utils libgl1
+sudo apt-get install -y python3-venv python3-dev python3-lgpio i2c-tools v4l-utils libgl1 libegl1 libgles2 alsa-utils
 sudo raspi-config nonint do_i2c 0 || true          # OLED on I2C-1 (SDA=GPIO2, SCL=GPIO3)
 python3 -m venv --system-site-packages "$REPO/.venv"
 "$REPO/.venv/bin/pip" install --upgrade pip

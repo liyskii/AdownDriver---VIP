@@ -247,8 +247,11 @@ def run_validation(ids: Optional[list] = None, cfg: Optional[AppConfig] = None, 
                        "metrics": {k: v["value"] for k, v in r.metrics["metrics"].items()}} for r in results],
         "aggregate": agg, "passed": n_pass, "total": len(results),
     }
-    (out_dir / "report.json").write_text(json.dumps(report, indent=2, default=str))
-    _write_markdown(report, out_dir / "REPORT.md", plot)
+    # a subset run (e.g. one scenario from the task launcher) must not overwrite the full 16-scenario report
+    stem = "" if len(chosen) == len(SCENARIOS) else "_subset"
+    report["subset"] = bool(stem)
+    (out_dir / f"report{stem}.json").write_text(json.dumps(report, indent=2, default=str))
+    _write_markdown(report, out_dir / f"REPORT{stem}.md", plot)
     if recorder:
         recorder.close()
     return report

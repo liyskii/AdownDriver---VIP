@@ -15,3 +15,16 @@ logs/validation/*.png
 models/*.task
 config/local.yaml
 data/*.mp4
+deploy/adowndriver_deploy.tgz
+deploy/adown_patch.tgz
+deploy/adown_ui_patch.tgz
+deploy/adowndriver_test.tgz
+lidar_diag.txt
+check_report.txt
+config/volume.txt
+# personal / third-party media and team spreadsheets - keep out of the public repo
+*.mp3
+sounds/warning.wav
+sounds/slowing.wav
+sounds/stop.wav
+*.xlsx

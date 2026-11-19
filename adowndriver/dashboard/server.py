@@ -115,6 +115,14 @@ def create_app(cfg: Optional[AppConfig] = None) -> FastAPI:
     app.state.hub = hub
     app.mount("/static", StaticFiles(directory=STATIC), name="static")
 
+    @app.middleware("http")
+    async def no_cache(request, call_next):
+        # the code on the robot changes during the demo day - never let the browser keep an old UI
+        resp = await call_next(request)
+        if request.url.path == "/" or request.url.path.startswith("/static"):
+            resp.headers["Cache-Control"] = "no-store"
+        return resp
+
     @app.get("/", response_class=HTMLResponse)
     def index():
         return FileResponse(STATIC / "index.html")

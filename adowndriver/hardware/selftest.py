@@ -64,14 +64,18 @@ def run_selftest(cfg: AppConfig, role: str) -> None:
         except Exception as exc:
             ok &= _line("FAIL", "road camera", str(exc)[:90])
         try:
-            from ..vehicle.io import TofSensor
-            t = TofSensor(cfg.vehicle)
-            time.sleep(0.5)
+            from ..vehicle.io import make_range_sensor
+            t = make_range_sensor(cfg.vehicle)
+            name = type(t).__name__
+            time.sleep(1.5)
             d, _ = t.read()
-            _line("OK" if d is not None else "WARN", "VL53L1X ToF", f"{d} cm")
+            if name == "NoTof":
+                ok &= _line("FAIL", "obstacle sensor", "no VL53L1X and no /scan (is turtlebot3_bringup running?)")
+            else:
+                _line("OK" if d is not None else "WARN", f"obstacle sensor ({name})", f"{d} cm ahead")
             t.close()
         except Exception as exc:
-            ok &= _line("FAIL", "VL53L1X ToF", str(exc)[:80])
+            ok &= _line("FAIL", "obstacle sensor", str(exc)[:80])
         try:
             import rclpy  # noqa: F401
             _line("OK", "ROS 2 rclpy", "remember: ros2 launch turtlebot3_bringup robot.launch.py")

@@ -1,6 +1,8 @@
 # Node 2 - TurtleBot 3 (Ubuntu 22.04 + ROS 2 Humble). rclpy/geometry_msgs come from apt (ros-humble-*).
 # picamera2 is optional (apt: python3-picamera2 on Raspberry Pi OS); on Ubuntu the V4L2 path is used.
 -r requirements.txt
+numpy<2                       # keep numpy 1.x next to the ROS 2 Humble system packages
+opencv-python-headless<4.11   # last OpenCV line built for numpy 1.x
 vl53l1x>=0.0.5                # Pimoroni VL53L1X driver (smbus2)
 smbus2>=0.4
 gpiozero>=2.0

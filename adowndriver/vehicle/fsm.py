@@ -289,6 +289,13 @@ class SafetyFSM:
         self.driver_level, self.driver_reason = level, reason
 
         # ---- latch with hysteresis ------------------------------------
+        # Parked (STANDBY): nothing to stop, so no latch - the live driver level is what
+        # blocks Start (DRIVER_NOT_VISIBLE etc.). Prevents a stale latch that Reset can't clear.
+        if self.state == State.STANDBY:
+            if self.latched_level and level == 0:
+                events.append(("RECOVERED", f"from_level={self.latched_level}"))
+            self.latched_level, self.latched_reason = level, (reason if level else "NONE")
+            return
         if level >= self.latched_level and level > 0:
             if level > self.latched_level or self.latched_reason == "NONE":
                 self.latched_reason = reason

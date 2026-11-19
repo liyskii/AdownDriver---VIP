@@ -56,3 +56,12 @@ def test_eye_closure_ladder(seconds, highest):
     else:
         # shorter closures de-escalate once the driver is alert again
         assert r.final_state == "NORMAL_CRUISE"
+
+
+
+def test_subset_run_keeps_full_report(tmp_path):
+    from adowndriver.sim.runner import run_validation
+    full = tmp_path / "report.json"
+    full.write_text("{}")
+    rep = run_validation(["S01"], None, plot=False, record=False, out_dir=tmp_path)
+    assert rep["subset"] and full.read_text() == "{}" and (tmp_path / "report_subset.json").is_file()

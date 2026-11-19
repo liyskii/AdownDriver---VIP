@@ -47,9 +47,9 @@ function subHtml(s){
 }
 function renderCatalogue(){
   el("taskList").innerHTML = TASKS.map(t => `
-    <article class="task" data-task="${t.id}" data-text="${esc((t.id+" "+t.title+" "+t.owners.join(" ")+" "+t.goal+" "+t.module).toLowerCase())}">
+    <article class="task" data-task="${t.id}" data-text="${esc((t.id+" "+t.title+" "+t.goal+" "+t.module).toLowerCase())}">
       <header><span class="tid">${t.id}</span><h3>${esc(t.title)}</h3>
-        <div class="owners">${t.owners.map(esc).join("<br>")}</div></header>
+        </header>
       <div class="goal">${esc(t.goal)} <code>${esc(t.module)}</code></div>
       <div class="subs">${t.subtasks.map(subHtml).join("")}</div>
     </article>`).join("");

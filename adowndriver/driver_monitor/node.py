@@ -183,6 +183,11 @@ class DriverMonitorNode:
             self.ack()
         elif cmd == "mute":
             self.ind.muted = bool(m.get("value"))
+        elif cmd == "volume":
+            if self.ind.audio.available:
+                self.ind.audio.set_volume(float(m.get("value", 0.6)))
+                if not self.ind.muted:
+                    self.ind.chirp()                      # short beep so you hear the new level
 
     def start_calibration(self, name: Optional[str] = None):
         self.calib = Calibrator(self.cfg.driver, name or self.profile.name)
@@ -334,6 +339,7 @@ class DriverMonitorNode:
                                                           "step": self.cue[2], "of": self.cue[3]},
                "driver": v, "vehicle": vs.get("state"), "sim": self.synth is not None,
                "sim_behaviour": getattr(self, "sim_behaviour", None), "muted": self.ind.muted,
+               "volume": round(self.ind.audio.volume, 2) if self.ind.audio.available else None,
                "oled": self.oled.available, "gpio": self.ind.backend}
         self.tx.send(json.dumps(msg, default=str).encode(), self.cfg.network.dashboard_ip,
                      self.cfg.network.telemetry_port)

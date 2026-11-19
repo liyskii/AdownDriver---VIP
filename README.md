@@ -25,7 +25,7 @@ python -m adowndriver --config config/sim.yaml ui     # opens http://127.0.0.1:8
 python -m adowndriver menu                            # same launcher as a terminal menu (SSH on a Pi)
 ```
 
-The **Tasks** tab lists the 9 project tasks of the team plan and their 21 runnable sub-tasks
+The **Tasks** tab lists the 9 project tasks of the team plan and their 25 runnable sub-tasks
 (owner, where it runs, missing packages, expected duration). Choose one, set its parameters and
 press *Run* / *Start*: the output streams live, plots and reports open next to the log, and node
 services feed the **Live** tab. A five-step mission flow (check hardware → calibrate → validate in
@@ -36,13 +36,13 @@ from the catalogue (`adowndriver/launcher/catalog.py`) can be started and every 
 |---|---|---|
 | T1 Driver monitoring (Node 1) | Andrey Li | webcam node, synthetic driver, EAR calibration, analyzer tests |
 | T2 Road perception & lane keeping | Nikita Pak | TurtleBot node, simulated track, homography tool, lane/control tests |
-| T3 Supervisory safety FSM | Li Vladislav, Arsen Baktybek uulu | FSM tests, one SIL scenario |
-| T4 Telemetry & audit | Vadim Lifrov, Husan Tulaev | protocol/audit tests, score a run → CSV |
-| T5 Operator HMI & demo | Hsu Shwe Sin Htun | one-click demo, demo with your own face |
+| T3 Supervisory safety FSM | Li Vladislav, Arsen Baktybek uulu, Dilshod Obidov | FSM tests, one SIL scenario |
+| T4 Telemetry & audit | Vadim Lifrov, Husan Tulaev, Dilshod Obidov | protocol/audit tests, score a run → CSV |
+| T5 Operator HMI & demo | Hsu Shwe Sin Htun, Sevinchxon Khoshimova | one-click demo, demo with your own face |
 | T6 Hardware bring-up | Saidumar Egamberdiev, Vadim Lifrov | self-test Node 1 / Node 2 |
-| T7 CAD & 3D-printed mounts | Fazliddin Igamberdiev | regenerate 7 STL parts + preview |
-| T8 Validation & QA | Dilshod Obidov | 16-scenario SIL, all tests, regression gate |
-| T9 Documentation & evidence | Sevinchxon Khoshimova | evidence pack (`logs/evidence/EVIDENCE.md`) |
+| T7 CAD & 3D-printed mounts | Fazliddin Igamberdiev | regenerate STL + preview |
+| T8 Validation & QA | Dilshod Obidov | 16-scenario SIL, all tests, regression gate, fault-injection subset, driver-state subset |
+| T9 Documentation, protocols & evidence | Sevinchxon Khoshimova | evidence pack (full / fast), guided F1 protocol on Node 1 |
 
 ## 1 · Try it in 2 minutes (no hardware)
 
